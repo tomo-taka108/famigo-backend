@@ -1,3 +1,30 @@
+# Gradle Wrapper（UNIX用はLF, WindowsのBATはCRLF）
 /gradlew text eol=lf
+/gradlew.bat text eol=crlf
+
+# Java / Gradle / Spring は LF で統一
+*.java text eol=lf
+*.kt   text eol=lf
+*.gradle text eol=lf
+settings.gradle text eol=lf
+*.xml  text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+*.properties text eol=lf
+
+# シェルスクリプト
+*.sh text eol=lf
+
+# Windows バッチ
 *.bat text eol=crlf
+
+# バイナリはそのまま
 *.jar binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pdf binary
+
+# デフォルト動作
+* text=auto
