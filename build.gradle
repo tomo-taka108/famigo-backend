@@ -41,6 +41,13 @@ dependencies {
 	// MySQL
 	runtimeOnly 'com.mysql:mysql-connector-j'
 
+	// Flyway
+	implementation 'org.flywaydb:flyway-core'
+	implementation 'org.flywaydb:flyway-mysql'
+
+	// Spring Security
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+
 	// Lombokの設定（この２行が必要！）
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
