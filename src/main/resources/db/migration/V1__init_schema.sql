@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS spots (                               -- 公園・屋
     staying_time VARCHAR(20) NULL,                               -- 滞在時間目安（1時間以内 / 2時間以内 / 半日 / 1日）Enum
     convenience_store VARCHAR(100) NULL,                         -- コンビニの有無・距離メモ
     restaurant_info VARCHAR(100) NULL,                           -- 飲食店情報（フードコート等）
-    google_map_url VARCHAR(500) NULL,                            -- GoogleマップURL
+    google_map_url VARCHAR(1000) NULL,                           -- GoogleマップURL
     closed_days VARCHAR(100) NULL,                               -- 定休日（「火曜日」「不定休」など自由入力）
     official_url VARCHAR(255) NULL,                              -- 公式サイトURL
     notes TEXT NULL,                                             -- 備考・メモ
@@ -60,6 +60,9 @@ CREATE TABLE IF NOT EXISTS spot_facilities (                     -- スポット
     athletics BOOLEAN NOT NULL DEFAULT 0,                        -- アスレチックあり
     water_play BOOLEAN NOT NULL DEFAULT 0,                       -- 水遊び可能
     indoor BOOLEAN NOT NULL DEFAULT 0,                           -- 屋内施設フラグ
+    created_at DATETIME NOT NULL,                                -- 登録日時
+    updated_at DATETIME NOT NULL,                                -- 更新日時
+    is_deleted TINYINT(1) NOT NULL DEFAULT 0,                    -- 論理削除フラグ（0:有効, 1:削除）
     CONSTRAINT fk_spot_facilities_spot                           -- FK制約名（spots への外部キー）
         FOREIGN KEY (spot_id) REFERENCES spots(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;                         -- InnoDB＋UTF-8で作成
@@ -78,6 +81,7 @@ CREATE TABLE IF NOT EXISTS reviews (                             -- ユーザー
     review_text TEXT NOT NULL,                                   -- レビュー本文
     cost_total INT NULL,                                         -- かかった合計金額（円）
     created_at DATETIME NOT NULL,                                -- 投稿日時
+    updated_at DATETIME NOT NULL,                                -- 更新日時
     is_deleted TINYINT(1) NOT NULL DEFAULT 0,                    -- 論理削除フラグ（0:有効, 1:削除）
     CONSTRAINT fk_reviews_spot                                   -- FK制約名（スポットへの外部キー）
         FOREIGN KEY (spot_id) REFERENCES spots(id),
@@ -94,6 +98,8 @@ CREATE TABLE IF NOT EXISTS favorites (                           -- ユーザー
     user_id BIGINT NOT NULL,                                     -- ユーザーID（FK → users.id）
     spot_id BIGINT NOT NULL,                                     -- スポットID（FK → spots.id）
     created_at DATETIME NOT NULL,                                -- お気に入り登録日時
+    updated_at DATETIME NOT NULL,                                -- 更新日時
+    is_deleted TINYINT(1) NOT NULL DEFAULT 0,                    -- 論理削除フラグ（0:有効, 1:削除）
     PRIMARY KEY (user_id, spot_id),                              -- 複合PK（同じ組合せを一意にする）
     CONSTRAINT fk_favorites_user                                 -- FK制約名（usersへの外部キー）
         FOREIGN KEY (user_id) REFERENCES users(id),
