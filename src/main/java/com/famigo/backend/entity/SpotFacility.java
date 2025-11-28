@@ -18,6 +18,7 @@ public class SpotFacility {
   private Long spotId;
   private Boolean diaperChanging;
   private Boolean strollerOk;
+  private Boolean playground;
   private Boolean athletics;
   private Boolean waterPlay;
   private Boolean indoor;
