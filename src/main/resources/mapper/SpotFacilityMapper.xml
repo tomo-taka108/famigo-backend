@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?> <!-- XMLの宣言。UTF-8で文字コードを指定 -->
+
+<!-- MyBatisのMapper定義を読み込む -->
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.famigo.backend.mapper.SpotFacilityMapper">
+<!-- namespace は Mapperインターフェースのパッケージ+クラス名と一致させる -->
+
+<!-- SpotFacility のマッピング設定 -->
+    <resultMap id="SpotFacilityResultMap" type="com.famigo.backend.entity.SpotFacility">
+        <id property="spotId" column="spot_id" />
+
+        <result property="diaperChanging" column="diaper_changing" />
+        <result property="strollerOk"     column="stroller_ok" />
+        <result property="playground"     column="playground" />
+        <result property="athletics"      column="athletics" />
+        <result property="waterPlay"      column="water_play" />
+        <result property="indoor"         column="indoor" />
+
+        <result property="createdAt"      column="created_at" />
+        <result property="updatedAt"      column="updated_at" />
+        <result property="isDeleted"      column="is_deleted" />
+    </resultMap>
+
+    <!-- ============================ -->
+    <!-- 設備情報（スポットID指定）検索 -->
+    <!-- ============================ -->
+    <select id="findBySpotId" resultMap="SpotFacilityResultMap">
+        SELECT
+            spot_id,
+            diaper_changing,
+            stroller_ok,
+            playground,
+            athletics,
+            water_play,
+            indoor,
+            created_at,
+            updated_at,
+            is_deleted
+        FROM spot_facilities
+        WHERE spot_id = #{spotId}
+          AND is_deleted = 0
+    </select>
+
+</mapper>
