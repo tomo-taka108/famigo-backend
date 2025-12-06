@@ -28,14 +28,14 @@ CREATE TABLE IF NOT EXISTS spots (                               -- 公園・屋
     name VARCHAR(200) NOT NULL,                                  -- スポット名
     address VARCHAR(255) NOT NULL,                               -- 住所（都道府県〜番地）
     area VARCHAR(100) NOT NULL,                                  -- 市区町村・エリア名（検索用）
-    price_type VARCHAR(50) NOT NULL,                             -- 予算（無料 / 1000円以内 / 2000円以内 /　2000円以上）Enum
+    price_type VARCHAR(50) NOT NULL,                             -- 予算（無料 / 1000円以内 / 2000円以内 /　2000円以上）アプリ側でEnum処理
     parking_info VARCHAR(255) NULL,                              -- 駐車場情報（有無・箇所数・総台数など自由入力）
     toilet_info VARCHAR(255) NULL,                               -- トイレ情報（数・場所など自由入力）
-    target_age VARCHAR(50) NULL,                                 -- 対象年齢帯（幼児 / 小学生など自由入力）
-    staying_time VARCHAR(20) NULL,                               -- 滞在時間目安（1時間以内 / 2時間以内 / 半日 / 1日）Enum
+    target_age VARCHAR(255) NULL,                                -- 対象年齢帯（幼児 / 小学生など自由入力）
+    staying_time VARCHAR(20) NULL,                               -- 滞在時間目安（1時間以内 / 2時間以内 / 半日 / 1日）アプリ側でEnum処理
     convenience_store VARCHAR(100) NULL,                         -- コンビニの有無・距離メモ
     restaurant_info VARCHAR(100) NULL,                           -- 飲食店情報（フードコート等）
-    google_map_url VARCHAR(1000) NULL,                           -- GoogleマップURL
+    google_map_url VARCHAR(2048) NULL,                           -- GoogleマップURL
     closed_days VARCHAR(100) NULL,                               -- 定休日（「火曜日」「不定休」など自由入力）
     official_url VARCHAR(255) NULL,                              -- 公式サイトURL
     notes TEXT NULL,                                             -- 備考・メモ

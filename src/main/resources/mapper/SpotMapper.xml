@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.famigo.backend.mapper.SpotMapper">
+  <!-- Spot一覧用DTOにマッピングするresultMap -->
+  <resultMap id="SpotListItemResultMap"
+    type="com.famigo.backend.dto.SpotListItemDto">
+
+    <id     property="id"           column="spot_id" />
+    <result property="name"         column="spot_name" />
+    <result property="address"      column="address" />
+    <result property="area"         column="area" />
+    <result property="priceType"    column="price_type" />
+    <result property="categoryName" column="category_name" />
+    <result property="googleMapUrl" column="google_map_url" />
+
+    <result property="diaperChanging" column="diaper_changing" />
+    <result property="strollerOk"     column="stroller_ok" />
+    <result property="playground"     column="playground" />
+    <result property="athletics"      column="athletics" />
+    <result property="waterPlay"      column="water_play" />
+    <result property="indoor"         column="indoor" />
+  </resultMap>
+
+  <!-- Spot + Category + SpotFacility をJOINして一覧取得 -->
+  <select id="findAllWithCategoryAndFacilities"
+    resultMap="SpotListItemResultMap">
+    SELECT
+    s.id             AS spot_id,
+    s.name           AS spot_name,
+    s.address        AS address,
+    s.area           AS area,
+    s.price_type     AS price_type,
+    c.name           AS category_name,
+    s.google_map_url AS google_map_url,
+
+    f.diaper_changing,
+    f.stroller_ok,
+    f.playground,
+    f.athletics,
+    f.water_play,
+    f.indoor
+    FROM
+    spots s
+    JOIN categories c
+    ON s.category_id = c.id
+    LEFT JOIN spot_facilities f
+    ON s.id = f.spot_id
+    AND f.is_deleted = 0
+    WHERE
+    s.is_deleted = 0
+    ORDER BY
+    s.id ASC
+  </select>
+
+</mapper>

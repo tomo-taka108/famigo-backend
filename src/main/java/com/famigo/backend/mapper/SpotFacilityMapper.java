@@ -2,7 +2,6 @@ package com.famigo.backend.mapper;
 
 import com.famigo.backend.entity.SpotFacility;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
 
 @Mapper
 public interface SpotFacilityMapper {
