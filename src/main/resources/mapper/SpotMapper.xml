@@ -55,4 +55,76 @@
     s.id ASC
   </select>
 
+  <!-- Spot詳細用DTOにマッピングするresultMap -->
+  <resultMap id="SpotDetailResultMap"
+    type="com.famigo.backend.dto.SpotDetailDto">
+
+    <!-- spots テーブル由来 -->
+    <id     property="id"           column="spot_id" />
+    <result property="name"         column="name" />
+    <result property="address"      column="address" />
+    <result property="area"         column="area" />
+    <result property="priceType"    column="price_type" />
+    <result property="categoryName" column="category_name" />
+
+    <result property="parkingInfo"      column="parking_info" />
+    <result property="toiletInfo"       column="toilet_info" />
+    <result property="targetAge"        column="target_age" />
+    <result property="stayingTime"      column="staying_time" />
+    <result property="convenienceStore" column="convenience_store" />
+    <result property="restaurantInfo"   column="restaurant_info" />
+    <result property="googleMapUrl"     column="google_map_url" />
+    <result property="closedDays"       column="closed_days" />
+    <result property="officialUrl"      column="official_url" />
+    <result property="notes"            column="notes" />
+
+    <!-- spot_facilities テーブル由来 -->
+    <result property="diaperChanging" column="diaper_changing" />
+    <result property="strollerOk"     column="stroller_ok" />
+    <result property="playground"     column="playground" />
+    <result property="athletics"      column="athletics" />
+    <result property="waterPlay"      column="water_play" />
+    <result property="indoor"         column="indoor" />
+  </resultMap>
+
+  <!-- ID指定でSpotの詳細を1件取得 -->
+  <select id="findDetailById"
+    parameterType="long"
+    resultMap="SpotDetailResultMap">
+    SELECT
+    s.id              AS spot_id,
+    s.name,
+    s.address,
+    s.area,
+    s.price_type,
+    c.name            AS category_name,
+    s.parking_info,
+    s.toilet_info,
+    s.target_age,
+    s.staying_time,
+    s.convenience_store,
+    s.restaurant_info,
+    s.google_map_url,
+    s.closed_days,
+    s.official_url,
+    s.notes,
+    f.diaper_changing,
+    f.stroller_ok,
+    f.playground,
+    f.athletics,
+    f.water_play,
+    f.indoor
+    FROM
+    spots s
+    JOIN categories c
+    ON s.category_id = c.id
+    LEFT JOIN spot_facilities f
+    ON s.id = f.spot_id
+    AND f.is_deleted = 0
+    WHERE
+    s.is_deleted = 0
+    AND s.id = #{id}
+  </select>
+
+
 </mapper>
