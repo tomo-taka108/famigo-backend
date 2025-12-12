@@ -19,7 +19,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 「スポット一覧・詳細情報」を提供する REST API の Controller クラスです。 トップページ一覧・スポット詳細画面から呼び出されます。
+ * 「スポット一覧・詳細情報」を提供する REST API の Controller クラスです。
+ * トップページ一覧・スポット詳細画面から呼び出されます。
  */
 @RestController
 @RequestMapping("/spots")   // このコントローラーで扱うURLの共通プレフィックスを設定
@@ -30,15 +31,15 @@ public class SpotController {
   private final SpotService spotService;
 
   /**
-   * スポット一覧（カテゴリ・設備情報を JOIN 済）のデータを取得するエンドポイントです。 検索条件（カテゴリ、住所、価格帯、対象年齢、設備など）は任意で指定可能です。
+   * スポット一覧（カテゴリ・設備情報を JOIN 済）のデータを取得するエンドポイントです。
+   * 検索条件（カテゴリ、住所、価格帯、対象年齢、設備など）は任意で指定可能です。
    * いずれの条件も指定されない場合は、論理削除されていないスポットを全件取得します。
    *
    * @param categoryIds カテゴリIDのリスト（例：?categoryIds=1&categoryIds=3）
    * @param address     住所（部分一致検索用の文字列）
    * @param price       価格帯のリスト（free / 1000 / 2000 / paid）
    * @param age         対象年齢のリスト（toddler / elementary）
-   * @param facilities  設備条件のリスト（toilet / parking / diaper / indoor / water / largePlayground /
-   *                    stroller など）
+   * @param facilities  設備条件のリスト（toilet / parking / diaper / indoor / water / largePlayground / stroller など）
    * @return 条件に合致するスポット一覧（SpotListItemDto のリスト）
    */
   @Operation(

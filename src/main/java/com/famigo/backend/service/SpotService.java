@@ -2,6 +2,7 @@ package com.famigo.backend.service;
 
 import com.famigo.backend.dto.SpotDetailDto;
 import com.famigo.backend.dto.SpotListItemDto;
+import com.famigo.backend.dto.SpotSearchCondition;
 import com.famigo.backend.mapper.SpotMapper;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +19,8 @@ public class SpotService {
    *
    * @return スポット一覧（SpotListItemのリスト）
    */
-  public List<SpotListItemDto> getSpotList() {
-    return spotMapper.findAllWithCategoryAndFacilities();
+  public List<SpotListItemDto> getSpotList(SpotSearchCondition condition) {
+    return spotMapper.findAllWithCategoryAndFacilities(condition);
     // Mapper経由でJOIN結果を取得し、そのまま返却
   }
 

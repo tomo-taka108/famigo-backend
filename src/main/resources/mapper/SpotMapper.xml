@@ -26,6 +26,7 @@
 
   <!-- Spot + Category + SpotFacility をJOINして一覧取得 -->
   <select id="findAllWithCategoryAndFacilities"
+    parameterType="com.famigo.backend.dto.SpotSearchCondition"
     resultMap="SpotListItemResultMap">
     SELECT
     s.id             AS spot_id,
@@ -49,10 +50,77 @@
     LEFT JOIN spot_facilities f
     ON s.id = f.spot_id
     AND f.is_deleted = 0
-    WHERE
+
+    <where>
     s.is_deleted = 0
-    ORDER BY
-    s.id ASC
+
+    <!-- 住所キーワード（名前・住所・エリアをまとめて検索） -->
+    <if test="address != null and address != ''">
+      AND (
+      s.name LIKE CONCAT('%', #{address}, '%')
+      OR s.address LIKE CONCAT('%', #{address}, '%')
+      OR s.area LIKE CONCAT('%', #{address}, '%')
+      )
+    </if>
+
+    <!-- カテゴリID指定（複数選択の IN 条件） -->
+    <if test="categoryIds != null and categoryIds.size() > 0">
+      AND s.category_id IN
+      <foreach collection="categoryIds" item="cid" open="(" separator="," close=")">
+        #{cid}
+      </foreach>
+    </if>
+
+    <!-- 予算（price_type IN (...)）: ※ ServiceでDBの値へ変換済み前提 -->
+    <if test="price != null and price.size() > 0">
+      AND s.price_type IN
+      <foreach collection="price" item="p" open="(" separator="," close=")">
+        #{p}
+      </foreach>
+    </if>
+
+    <!-- 対象年齢（文字列に含まれていればOK、OR条件） -->
+    <if test="age != null and age.size() > 0">
+      AND (
+      1 = 0
+      <if test="age.contains('toddler')">
+        OR s.target_age LIKE '%幼児%'
+      </if>
+      <if test="age.contains('elemLow')">
+        OR s.target_age LIKE '%小学生低学年%'
+      </if>
+      <if test="age.contains('elemHigh')">
+        OR s.target_age LIKE '%小学生高学年%'
+      </if>
+      <if test="age.contains('juniorHigh')">
+        OR s.target_age LIKE '%中学生以上%'
+      </if>
+      )
+    </if>
+
+    <!-- 設備（選択されたものはAND条件で絞り込む） -->
+    <if test="facilities != null">
+      <if test="facilities.contains('diaper')">
+        AND f.diaper_changing = 1
+      </if>
+      <if test="facilities.contains('stroller')">
+        AND f.stroller_ok = 1
+      </if>
+      <if test="facilities.contains('playground')">
+        AND f.playground = 1
+      </if>
+      <if test="facilities.contains('athletics')">
+        AND f.athletics = 1
+      </if>
+      <if test="facilities.contains('water')">
+        AND f.water_play = 1
+      </if>
+      <if test="facilities.contains('indoor')">
+        AND f.indoor = 1
+      </if>
+    </if>
+    </where>
+  ORDER BY s.id ASC
   </select>
 
   <!-- Spot詳細用DTOにマッピングするresultMap -->
