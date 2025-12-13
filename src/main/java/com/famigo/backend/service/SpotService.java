@@ -2,6 +2,7 @@ package com.famigo.backend.service;
 
 import com.famigo.backend.dto.SpotDetailDto;
 import com.famigo.backend.dto.SpotListItemDto;
+import com.famigo.backend.dto.SpotSearchCondition;
 import com.famigo.backend.mapper.SpotMapper;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -16,11 +17,12 @@ public class SpotService {
   /**
    * スポット一覧（カテゴリ・設備情報をJOIN済）のデータを取得するメソッド
    *
-   * @return スポット一覧（SpotListItemのリスト）
+   * @param condition 検索条件（null項目は条件なしとして扱う）
+   * @return スポット一覧（SpotListItemDto のリスト）
    */
-  public List<SpotListItemDto> getSpotList() {
-    return spotMapper.findAllWithCategoryAndFacilities();
-    // Mapper経由でJOIN結果を取得し、そのまま返却
+  public List<SpotListItemDto> getSpotList(SpotSearchCondition condition) {
+    return spotMapper.findAllWithCategoryAndFacilities(condition);
+    // Mapperに条件を渡して一覧取得
   }
 
   /**
@@ -31,7 +33,7 @@ public class SpotService {
    */
   public SpotDetailDto getSpotDetail(Long id) {
     return spotMapper.findDetailById(id);
-    // Mapper経由でJOIN結果を取得し、そのまま返却
+    // MapperにIDを渡して詳細取得
   }
 
 }

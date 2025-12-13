@@ -2,6 +2,9 @@ package com.famigo.backend.controller;
 
 import com.famigo.backend.dto.SpotDetailDto;
 import com.famigo.backend.dto.SpotListItemDto;
+import com.famigo.backend.dto.SpotSearchCondition;
+import com.famigo.backend.enums.AgeGroup;
+import com.famigo.backend.enums.PriceType;
 import com.famigo.backend.service.SpotService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -14,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -29,15 +33,22 @@ public class SpotController {
   private final SpotService spotService;
 
   /**
-   * スポット一覧（カテゴリ・設備情報を JOIN 済）のデータを取得するエンドポイントです。
-   * 検索条件は指定せず、論理削除されていないスポットを全件取得します。
+   * スポット一覧（カテゴリ・設備情報を JOIN 済）のデータを取得するエンドポイント。
+   * 検索条件（カテゴリ、キーワード、予算、対象年齢、設備など）は任意で指定可能。
+   * いずれの条件も指定されない場合は、論理削除されていないスポットを全件取得。
    *
-   * @return スポット一覧（SpotListItemDto のリスト）
+   * @param categoryIds カテゴリIDのリスト（複数指定可）
+   * @param keyword     キーワード（スポット名/住所/エリアをまとめて部分一致検索）
+   * @param price       予算（Enum名を指定：FREE / UNDER_1000 / UNDER_2000 / OVER_2000）（複数指定可）
+   * @param age         対象年齢（Enum名を指定：ALL / PRESCHOOL / ELE_LOW / ELE_HIGH / JUNIOR_HIGH）（複数指定可）
+   * @param facilities   設備フィルタ（例：diaper, stroller, playground, athletics, water, indoor）（複数指定可）
+   * @return 条件に合致するスポット一覧（SpotListItemDto のリスト）
    */
   @Operation(
-      summary = "スポット一覧の取得【条件指定なし】",
+      summary = "スポット一覧の取得【検索条件指定可】",
       description = "カテゴリ情報・設備情報を JOIN 済みのスポット一覧を取得します。"
-          + "検索条件は指定せず、論理削除されていないスポットを ID 昇順で返します。",
+          + "クエリパラメータでカテゴリID、キーワード、予算（Enum名）、対象年齢（Enum名）、設備などを指定可能です。"
+          + "いずれの条件も指定されない場合は、論理削除されていないスポットを ID 昇順で全件返します。",
       responses = {
           @ApiResponse(
               responseCode = "200",
@@ -51,13 +62,30 @@ public class SpotController {
           )
       }
   )
+
   @GetMapping
-  public List<SpotListItemDto> getSpots() {
-    return spotService.getSpotList();
+  public List<SpotListItemDto> getSpots(
+      @RequestParam(required = false) List<Long> categoryIds,
+      @RequestParam(required = false) String keyword,
+      @RequestParam(required = false) List<PriceType> price,
+      @RequestParam(required = false) List<AgeGroup> age,
+      @RequestParam(required = false, name = "facilities") List<String> facilities
+  ) {
+
+    // ★ 検索条件DTOを組み立て（nullなら条件なしとして扱う）
+    SpotSearchCondition condition = new SpotSearchCondition();
+    condition.setCategoryIds(categoryIds);
+    condition.setKeyword(keyword);
+    condition.setPrice(price);
+    condition.setAge(age);
+    condition.setFacilities(facilities);
+
+    return spotService.getSpotList(condition);
   }
 
+
   /**
-   * 指定したスポットIDの詳細情報（基本情報 + カテゴリ + 設備情報など）を取得するエンドポイントです。
+   * 指定したスポットIDの詳細情報（基本情報 + カテゴリ + 設備情報など）を取得するエンドポイント。
    *
    * @param id 取得対象のスポットID
    * @return SpotDetailDto（スポット詳細情報）
@@ -78,6 +106,7 @@ public class SpotController {
           // ここに ApiResponse を追加していく想定
       }
   )
+
   @GetMapping("/{id}")
   public SpotDetailDto getSpotDetail(@PathVariable Long id) {
     return spotService.getSpotDetail(id);

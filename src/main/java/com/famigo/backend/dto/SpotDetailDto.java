@@ -38,7 +38,7 @@ public class SpotDetailDto {
   @Schema(description = "トイレ情報（spots.toilet_info）")
   private String toiletInfo;                           // トイレ情報メモ
 
-  @Schema(description = "対象年齢（spots.target_age）", example = "幼児 / 小学生")
+  @Schema(description = "対象年齢（spots.target_age）", example = "小学校低学年まで")
   private String targetAge;                            // 対象年齢メモ
 
   @Schema(description = "滞在時間目安（spots.staying_time）", example = "半日")

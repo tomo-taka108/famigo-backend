@@ -2,6 +2,7 @@ package com.famigo.backend.mapper;
 
 import com.famigo.backend.dto.SpotDetailDto;
 import com.famigo.backend.dto.SpotListItemDto;
+import com.famigo.backend.dto.SpotSearchCondition;
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -14,7 +15,7 @@ public interface SpotMapper {
    *
    * @return スポットの一覧（SpotListItemDto のリスト）
    */
-  List<SpotListItemDto> findAllWithCategoryAndFacilities();
+  List<SpotListItemDto> findAllWithCategoryAndFacilities(SpotSearchCondition condition);
 
   /**
    * 指定したスポットIDの「スポット詳細情報」を取得するメソッド
