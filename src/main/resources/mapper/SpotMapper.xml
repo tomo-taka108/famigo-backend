@@ -4,7 +4,10 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.famigo.backend.mapper.SpotMapper">
-  <!-- Spot一覧用DTOにマッピングするresultMap -->
+
+  <!-- =========================================================
+       Spot一覧用DTOにマッピングするresultMap
+       ========================================================= -->
   <resultMap id="SpotListItemResultMap"
     type="com.famigo.backend.dto.SpotListItemDto">
 
@@ -14,6 +17,7 @@
     <result property="area"         column="area" />
     <result property="priceType"    column="price_type" />
     <result property="categoryName" column="category_name" />
+    <result property="targetAge"    column="target_age" />
     <result property="googleMapUrl" column="google_map_url" />
 
     <result property="diaperChanging" column="diaper_changing" />
@@ -24,10 +28,17 @@
     <result property="indoor"         column="indoor" />
   </resultMap>
 
-  <!-- Spot + Category + SpotFacility をJOINして一覧取得 -->
+
+  <!-- =========================================================
+       Spot + Category + SpotFacility をJOINして一覧取得（検索条件あり）
+       parameterType: SpotSearchCondition
+       price: List<PriceType> → p.value をIN
+       age  : List<AgeGroup>  → a.value をIN
+       ========================================================= -->
   <select id="findAllWithCategoryAndFacilities"
     parameterType="com.famigo.backend.dto.SpotSearchCondition"
     resultMap="SpotListItemResultMap">
+
     SELECT
     s.id             AS spot_id,
     s.name           AS spot_name,
@@ -35,6 +46,7 @@
     s.area           AS area,
     s.price_type     AS price_type,
     c.name           AS category_name,
+    s.target_age     AS target_age,
     s.google_map_url AS google_map_url,
 
     f.diaper_changing,
@@ -52,78 +64,72 @@
     AND f.is_deleted = 0
 
     <where>
-    s.is_deleted = 0
+      s.is_deleted = 0
 
-    <!-- 住所キーワード（名前・住所・エリアをまとめて検索） -->
-    <if test="address != null and address != ''">
-      AND (
-      s.name LIKE CONCAT('%', #{address}, '%')
-      OR s.address LIKE CONCAT('%', #{address}, '%')
-      OR s.area LIKE CONCAT('%', #{address}, '%')
-      )
-    </if>
+      <!-- キーワード（名前・住所・エリアをまとめて検索） -->
+      <if test="keyword != null and keyword != ''">
+        AND (
+        s.name LIKE CONCAT('%', #{keyword}, '%')
+        OR s.address LIKE CONCAT('%', #{keyword}, '%')
+        OR s.area LIKE CONCAT('%', #{keyword}, '%')
+        )
+      </if>
 
-    <!-- カテゴリID指定（複数選択の IN 条件） -->
-    <if test="categoryIds != null and categoryIds.size() > 0">
-      AND s.category_id IN
-      <foreach collection="categoryIds" item="cid" open="(" separator="," close=")">
-        #{cid}
-      </foreach>
-    </if>
+      <!-- カテゴリID指定（複数選択の IN 条件） -->
+      <if test="categoryIds != null and categoryIds.size() > 0">
+        AND s.category_id IN
+        <foreach collection="categoryIds" item="cid" open="(" separator="," close=")">
+          #{cid}
+        </foreach>
+      </if>
 
-    <!-- 予算（price_type IN (...)）: ※ ServiceでDBの値へ変換済み前提 -->
-    <if test="price != null and price.size() > 0">
-      AND s.price_type IN
-      <foreach collection="price" item="p" open="(" separator="," close=")">
-        #{p}
-      </foreach>
-    </if>
+      <!-- 予算（List<PriceType>：DB保存値（日本語ラベル）でIN） -->
+      <if test="price != null and price.size() > 0">
+        AND s.price_type IN
+        <foreach collection="price" item="p" open="(" separator="," close=")">
+          #{p.value}
+        </foreach>
+      </if>
 
-    <!-- 対象年齢（文字列に含まれていればOK、OR条件） -->
-    <if test="age != null and age.size() > 0">
-      AND (
-      1 = 0
-      <if test="age.contains('toddler')">
-        OR s.target_age LIKE '%幼児%'
+      <!-- 対象年齢（List<AgeGroup>：DB保存値（日本語ラベル）でIN） -->
+      <if test="age != null and age.size() > 0">
+        AND s.target_age IN
+        <foreach collection="age" item="a" open="(" separator="," close=")">
+          #{a.value}
+        </foreach>
       </if>
-      <if test="age.contains('elemLow')">
-        OR s.target_age LIKE '%小学生低学年%'
-      </if>
-      <if test="age.contains('elemHigh')">
-        OR s.target_age LIKE '%小学生高学年%'
-      </if>
-      <if test="age.contains('juniorHigh')">
-        OR s.target_age LIKE '%中学生以上%'
-      </if>
-      )
-    </if>
 
-    <!-- 設備（選択されたものはAND条件で絞り込む） -->
-    <if test="facilities != null">
-      <if test="facilities.contains('diaper')">
-        AND f.diaper_changing = 1
+      <!-- 設備（選択されたものはAND条件で絞り込む） -->
+      <if test="facilities != null and facilities.size() > 0">
+        <if test="facilities.contains('diaper')">
+          AND f.diaper_changing = 1
+        </if>
+        <if test="facilities.contains('stroller')">
+          AND f.stroller_ok = 1
+        </if>
+        <if test="facilities.contains('playground')">
+          AND f.playground = 1
+        </if>
+        <if test="facilities.contains('athletics')">
+          AND f.athletics = 1
+        </if>
+        <if test="facilities.contains('water')">
+          AND f.water_play = 1
+        </if>
+        <if test="facilities.contains('indoor')">
+          AND f.indoor = 1
+        </if>
       </if>
-      <if test="facilities.contains('stroller')">
-        AND f.stroller_ok = 1
-      </if>
-      <if test="facilities.contains('playground')">
-        AND f.playground = 1
-      </if>
-      <if test="facilities.contains('athletics')">
-        AND f.athletics = 1
-      </if>
-      <if test="facilities.contains('water')">
-        AND f.water_play = 1
-      </if>
-      <if test="facilities.contains('indoor')">
-        AND f.indoor = 1
-      </if>
-    </if>
+
     </where>
-  ORDER BY s.id ASC
+
+    ORDER BY s.id ASC
   </select>
 
-  <!-- Spot詳細用DTOにマッピングするresultMap -->
+
+  <!-- =========================================================
+       Spot詳細用DTOにマッピングするresultMap
+       ========================================================= -->
   <resultMap id="SpotDetailResultMap"
     type="com.famigo.backend.dto.SpotDetailDto">
 
@@ -155,7 +161,10 @@
     <result property="indoor"         column="indoor" />
   </resultMap>
 
-  <!-- ID指定でSpotの詳細を1件取得 -->
+
+  <!-- =========================================================
+       ID指定でSpotの詳細を1件取得
+       ========================================================= -->
   <select id="findDetailById"
     parameterType="long"
     resultMap="SpotDetailResultMap">
@@ -193,6 +202,5 @@
     s.is_deleted = 0
     AND s.id = #{id}
   </select>
-
 
 </mapper>

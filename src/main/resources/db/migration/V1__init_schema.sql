@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS spots (                               -- 公園・屋
     price_type VARCHAR(50) NOT NULL,                             -- 予算（無料 / 1000円以内 / 2000円以内 /　2000円以上）アプリ側でEnum処理
     parking_info VARCHAR(255) NULL,                              -- 駐車場情報（有無・箇所数・総台数など自由入力）
     toilet_info VARCHAR(255) NULL,                               -- トイレ情報（数・場所など自由入力）
-    target_age VARCHAR(255) NULL,                                -- 対象年齢帯（幼児 / 小学生など自由入力）
+    target_age VARCHAR(255) NULL,                                -- 対象年齢帯（年齢問わない / 未就学まで / 小学校低学年まで / 小学校高学年まで / 中学生まで）アプリ側でEnum処理
     staying_time VARCHAR(20) NULL,                               -- 滞在時間目安（1時間以内 / 2時間以内 / 半日 / 1日）アプリ側でEnum処理
     convenience_store VARCHAR(100) NULL,                         -- コンビニの有無・距離メモ
     restaurant_info VARCHAR(100) NULL,                           -- 飲食店情報（フードコート等）

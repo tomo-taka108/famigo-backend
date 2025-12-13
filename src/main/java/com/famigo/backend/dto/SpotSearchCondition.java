@@ -1,5 +1,7 @@
 package com.famigo.backend.dto;
 
+import com.famigo.backend.enums.AgeGroup;
+import com.famigo.backend.enums.PriceType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -18,16 +20,16 @@ public class SpotSearchCondition {
   @Schema(description = "カテゴリID一覧（複数選択可）", example = "[1, 3]")
   private List<Long> categoryIds;
 
-  @Schema(description = "住所・エリア・スポット名などのキーワード", example = "京都市")
-  private String address;
+  @Schema(description = "キーワード（スポット名/住所/エリアをまとめて部分一致検索）", example = "京都市")
+  private String keyword;
 
-  @Schema(description = "予算フィルタ：free, 1000, 2000, over2000", example = "[\"free\", \"1000\"]")
-  private List<String> price;
+  @Schema(description = "予算フィルタ（複数選択可：Enum名を指定）", example = "[\"FREE\", \"UNDER_1000\"]")
+  private List<PriceType> price;
 
-  @Schema(description = "対象年齢フィルタ：toddler, eleLow, eleHigh, juniorHigh", example = "[\"toddler\", \"eleLow\"]")
-  private List<String> age;
+  @Schema(description = "対象年齢帯フィルタ（複数選択可：Enum名を指定）", example = "[\"PRESCHOOL\", \"ELE_LOW\"]")
+  private List<AgeGroup> age;
 
-  @Schema(description = "設備フィルタ：diaper, stroller, playground, athletics, water, indoor", example = "[\"diaper\", \"indoor\"]")
+  @Schema(description = "設備フィルタ（複数選択可：diaper, stroller, playground, athletics, water, indoor）", example = "[\"diaper\", \"indoor\"]")
   private List<String> facilities;
 
 }

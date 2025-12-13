@@ -33,6 +33,9 @@ public class SpotListItemDto {
   @Schema(description = "カテゴリ名（categories.name）", example = "公園")
   private String categoryName;
 
+  @Schema(description = "対象年齢（spots.target_age）", example = "小学校低学年まで")
+  private String targetAge;
+
   @Schema(description = "GoogleマップURL（spots.google_map_url）")
   private String googleMapUrl;
 
