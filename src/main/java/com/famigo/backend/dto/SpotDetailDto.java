@@ -26,8 +26,8 @@ public class SpotDetailDto {
   @Schema(description = "エリア名（spots.area）", example = "野洲市")
   private String area;                                 // エリア名
 
-  @Schema(description = "価格区分（spots.price_type）", example = "1000円以内")
-  private String priceType;                            // 価格区分
+  @Schema(description = "予算区分（spots.price_type）", example = "1000円以内")
+  private String priceType;                            // 予算区分
 
   @Schema(description = "カテゴリ名（categories.name）", example = "公園")
   private String categoryName;                         // カテゴリ名
@@ -72,8 +72,8 @@ public class SpotDetailDto {
   @Schema(description = "遊具があるか（playground）", example = "true")
   private Boolean playground;                          // 遊具あり
 
-  @Schema(description = "アスレチックがあるか（athletics）", example = "false")
-  private Boolean athletics;                           // アスレチック
+  @Schema(description = "アスレチックコースがあるか（athletics）", example = "false")
+  private Boolean athletics;                           // アスレチックコース
 
   @Schema(description = "水遊びが可能か（water_play）", example = "true")
   private Boolean waterPlay;                           // 水遊び
