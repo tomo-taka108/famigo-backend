@@ -238,7 +238,7 @@ INSERT INTO spots (
    'https://www.google.co.jp/maps/place/%E8%B5%A4%E5%AD%90%E5%B1%B1%E3%82%B9%E3%82%AD%E3%83%BC%E5%A0%B4%E3%82%B9%E3%83%8E%E3%83%BC%E3%83%91%E3%83%AB/@35.5467593,136.2171061,917m/data=!3m1!1e3!4m14!1m7!3m6!1s0x60021ff794611d59:0x847d7ea7dcb811e2!2z6LWk5a2Q5bGx44K544Kt44O85aC044K544OO44O844OR44Or!8m2!3d35.546755!4d136.219681!16s%2Fg%2F1tcxv4jy!3m5!1s0x60021ff794611d59:0x847d7ea7dcb811e2!8m2!3d35.546755!4d136.219681!16s%2Fg%2F1tcxv4jy?entry=ttu&g_ep=EgoyMDI1MTEyMC4xIKXMDSoASAFQAw%3D%3D',
    '火曜日',
    'https://woodypal.jp/facility/%E8%B5%A4%E5%AD%90%E5%B1%B1%E3%82%B9%E3%82%AD%E3%83%BC%E5%A0%B4-%E3%82%B9%E3%83%8E%E3%83%BC%E3%83%91%E3%83%AB/',
-   '家族向けのそり・雪遊び専用ゲレンデ。リフトなし。',
+   '家族向けのそり・雪遊び専用ゲレンデ。リフトなし。隣接でアスレチックコースあり。',
    NOW(),
    NOW(),
    0

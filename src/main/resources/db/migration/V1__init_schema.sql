@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS spot_facilities (                     -- スポット
     diaper_changing BOOLEAN NOT NULL DEFAULT 0,                  -- オムツ替えスペース有無（0:なし, 1:あり）
     stroller_ok BOOLEAN NOT NULL DEFAULT 0,                      -- ベビーカー利用可否
     playground BOOLEAN NOT NULL DEFAULT 0,                       -- 遊具あり
-    athletics BOOLEAN NOT NULL DEFAULT 0,                        -- アスレチックあり
+    athletics BOOLEAN NOT NULL DEFAULT 0,                        -- アスレチックコースあり
     water_play BOOLEAN NOT NULL DEFAULT 0,                       -- 水遊び可能
     indoor BOOLEAN NOT NULL DEFAULT 0,                           -- 屋内施設フラグ
     created_at DATETIME NOT NULL,                                -- 登録日時

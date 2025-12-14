@@ -11,7 +11,7 @@ public enum PriceType {
   FREE("無料"),
   UNDER_1000("1000円以内"),
   UNDER_2000("2000円以内"),
-  OVER_2000("2000円以上");
+  OVER_2000("2000円超");
 
   @Schema(description = "画面表示・DB保存に使う値（日本語ラベル）", example = "1000円以内")
   private final String value;

@@ -8,7 +8,7 @@ INSERT INTO spot_facilities (
     diaper_changing,  -- おむつ交換台（1:あり / 0:なし）
     stroller_ok,      -- ベビーカー利用可（1:可 / 0:不可）
     playground,       -- 遊具（1:あり / 0:なし）
-    athletics,        -- アスレチック（1:あり / 0:なし）
+    athletics,        -- アスレチックコース（1:あり / 0:なし）
     water_play,       -- 水遊び場（1:あり / 0:なし）
     indoor,           -- 屋内施設（1:屋内メイン / 0:屋外メイン）
     created_at,
@@ -111,7 +111,7 @@ INSERT INTO spot_facilities (
    1,
    1,
    1,
-   1,
+   0,
    0,
    1,
    NOW(),
