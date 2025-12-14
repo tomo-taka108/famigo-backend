@@ -1,7 +1,6 @@
 package com.famigo.backend.mapper;
 
 import com.famigo.backend.dto.CategoryDto;
-import com.famigo.backend.entity.SpotFacility;
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 
