@@ -8,13 +8,13 @@ import lombok.Getter;
 
 public enum AgeGroup {
 
-  ALL("年齢問わない"),
-  PRESCHOOL("未就学まで"),
+  ALL("全年齢"),
+  PRESCHOOL("未就学児まで"),
   ELE_LOW("小学校低学年まで"),
   ELE_HIGH("小学校高学年まで"),
   JUNIOR_HIGH("中学生まで");
 
-  @Schema(description = "画面表示・DB保存に使う値（日本語ラベル）", example = "未就学まで")
+  @Schema(description = "画面表示・DB保存に使う値（日本語ラベル）", example = "未就学児まで")
   private final String value;
 
   AgeGroup(String value) {
