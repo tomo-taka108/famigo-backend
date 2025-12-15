@@ -15,6 +15,7 @@ public class ReviewService {
   /**
    * スポットIDに紐づくスポット1件のレビュー一覧を投稿日時の新しい順で取得するメソッド
    *
+   * @param spotId スポットID
    * @return スポット1件のレビュー一覧
    */
   public List<ReviewListItemDto> getReviewsBySpotId(Long spotId) {

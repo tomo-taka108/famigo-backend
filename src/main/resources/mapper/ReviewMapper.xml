@@ -5,13 +5,17 @@
 
 <mapper namespace="com.famigo.backend.mapper.ReviewMapper">
 
-  <!-- カテゴリ一覧取得（categories に論理削除カラムは無い） -->
+  <!--
+    スポットIDに紐づくレビュー一覧取得
+    ・論理削除レビュー（is_deleted = 1）は除外
+    ・ユーザーが退会 / 削除されている場合は「退会済みユーザー」と表示
+  -->
   <select id="selectReviewsBySpotId" resultType="com.famigo.backend.dto.ReviewListItemDto">
     SELECT
     r.id            AS id,
     r.spot_id       AS spotId,
     r.user_id       AS userId,
-    u.name          AS userName,
+    COALESCE(u.name, '退会済みユーザー') AS userName,
     r.rating        AS rating,
     r.review_text   AS reviewText,
     r.created_at    AS createdAt
