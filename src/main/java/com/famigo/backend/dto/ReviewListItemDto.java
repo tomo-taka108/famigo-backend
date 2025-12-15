@@ -31,7 +31,7 @@ public class ReviewListItemDto {
   private Integer rating;
 
   @Schema(description = "レビュー本文", example = "敷地が広くて遊具の種類も多く、子どもが一日中遊べました")
-  private String comment;
+  private String reviewText;
 
   @Schema(description = "投稿日（reviews.created_at）", example = "2025-12-01T10:30:00")
   private LocalDateTime createdAt;
