@@ -12,13 +12,24 @@
   -->
   <select id="selectReviewsBySpotId" resultType="com.famigo.backend.dto.ReviewListItemDto">
     SELECT
-    r.id            AS id,
-    r.spot_id       AS spotId,
-    r.user_id       AS userId,
-    COALESCE(u.name, '退会済みユーザー') AS userName,
-    r.rating        AS rating,
-    r.review_text   AS reviewText,
-    r.created_at    AS createdAt
+    r.id          AS id,
+    r.spot_id     AS spotId,
+    r.user_id     AS userId,
+
+    CASE
+    WHEN u.id IS NULL
+    THEN '退会済みユーザー'
+
+    WHEN u.is_deleted = 1
+    THEN '退会済みユーザー'
+
+    ELSE COALESCE(u.name, '退会済みユーザー')
+    END           AS userName,
+
+    r.rating      AS rating,
+    r.review_text AS reviewText,
+    r.created_at  AS createdAt
+
     FROM reviews r
     LEFT JOIN users u
     ON u.id = r.user_id
