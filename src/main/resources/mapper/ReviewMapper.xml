@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.famigo.backend.mapper.ReviewMapper">
+
+  <!--
+    スポットIDに紐づくレビュー一覧取得
+    ・論理削除レビュー（is_deleted = 1）は除外
+    ・ユーザーが退会 / 削除されている場合は「退会済みユーザー」と表示
+  -->
+  <select id="selectReviewsBySpotId" resultType="com.famigo.backend.dto.ReviewListItemDto">
+    SELECT
+    r.id          AS id,
+    r.spot_id     AS spotId,
+    r.user_id     AS userId,
+
+    CASE
+    WHEN u.id IS NULL
+    THEN '退会済みユーザー'
+
+    WHEN u.is_deleted = 1
+    THEN '退会済みユーザー'
+
+    ELSE COALESCE(u.name, '退会済みユーザー')
+    END           AS userName,
+
+    r.rating      AS rating,
+    r.review_text AS reviewText,
+    r.created_at  AS createdAt
+
+    FROM reviews r
+    LEFT JOIN users u
+    ON u.id = r.user_id
+    WHERE r.spot_id = #{spotId}
+    AND r.is_deleted = 0
+    ORDER BY r.created_at DESC
+  </select>
+
+</mapper>
