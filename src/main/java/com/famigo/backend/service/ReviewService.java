@@ -1,10 +1,12 @@
 package com.famigo.backend.service;
 
+import com.famigo.backend.dto.ReviewCreateRequest;
 import com.famigo.backend.dto.ReviewListItemDto;
 import com.famigo.backend.mapper.ReviewMapper;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor   // finalフィールドを引数に持つコンストラクタを自動生成
@@ -20,6 +22,19 @@ public class ReviewService {
    */
   public List<ReviewListItemDto> getReviewsBySpotId(Long spotId) {
     return reviewMapper.selectReviewsBySpotId(spotId);
+  }
+
+  /**
+   * スポットIDとユーザーIDを紐づけてレビューを新規登録するメソッド
+   *
+   * @param spotId スポットID
+   * @param request レビュー投稿リクエストDTO
+   * ログイン機能を未実装のため、userIdは仮固定
+   */
+  @Transactional
+  public void createReview(Long spotId, ReviewCreateRequest request) {
+    Long fixedUserId = 1L; // ログイン機能未実装のためユーザーIDは仮固定
+    reviewMapper.insertReview(spotId, fixedUserId, request);
   }
 
 }

@@ -2,6 +2,7 @@ package com.famigo.backend.mapper;
 
 import com.famigo.backend.entity.SpotFacility;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface SpotFacilityMapper {
@@ -12,6 +13,6 @@ public interface SpotFacilityMapper {
    * @param spotId スポットID
    * @return スポット1件の設備情報
    */
-  SpotFacility findBySpotId(Long spotId);
+  SpotFacility findBySpotId(@Param("spotId") Long spotId);
 
 }
