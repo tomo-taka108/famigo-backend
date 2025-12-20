@@ -38,4 +38,40 @@
     ORDER BY r.created_at DESC
   </select>
 
+
+  <!--
+    スポットIDに紐づくレビュー投稿
+  -->
+  <insert id="insertReview">
+    INSERT INTO reviews (
+    spot_id,
+    user_id,
+    child_age_group,
+    rating,
+    rating_cost,
+    crowd_level,
+    toilet_cleanliness,
+    stroller_ease,
+    review_text,
+    cost_total,
+    created_at,
+    updated_at,
+    is_deleted
+    ) VALUES (
+    #{spotId},
+    #{userId},
+    #{request.childAgeGroup.value},
+    #{request.rating},
+    #{request.ratingCost},
+    #{request.crowdLevel},
+    #{request.toiletCleanliness},
+    #{request.strollerEase},
+    #{request.reviewText},
+    #{request.costTotal},
+    NOW(),
+    NOW(),
+    0
+    )
+  </insert>
+
 </mapper>
