@@ -20,6 +20,7 @@ import lombok.Setter;
 public class ReviewCreateRequest {
 
   @Schema(description = "子どもの年齢帯（単一選択）", example = "PRESCHOOL")
+  @NotNull
   private ChildAgeGroup childAgeGroup;
 
   @Schema(description = "総合評価（1〜5）", example = "5")
@@ -53,6 +54,7 @@ public class ReviewCreateRequest {
   private String reviewText;
 
   @Schema(description = "かかった合計金額（円）", example = "1000")
+  @Min(0)
   private Integer costTotal;
 
 }

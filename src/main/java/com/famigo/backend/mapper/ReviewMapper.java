@@ -15,7 +15,7 @@ public interface ReviewMapper {
    * @param spotId スポットID
    * @return スポット1件のレビュー一覧
    */
-  List<ReviewListItemDto> selectReviewsBySpotId(Long spotId);
+  List<ReviewListItemDto> selectReviewsBySpotId(@Param("spotId") Long spotId);
 
   /**
    * スポットに紐づくレビューを新規登録するメソッド

@@ -40,7 +40,7 @@
 
 
   <!--
-    スポットIDに紐づくレビュー投稿
+    スポットIDに紐づくレビューを新規登録する
   -->
   <insert id="insertReview">
     INSERT INTO reviews (
