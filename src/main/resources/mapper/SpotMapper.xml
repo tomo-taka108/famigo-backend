@@ -20,6 +20,8 @@
     <result property="targetAge"    column="target_age" />
     <result property="googleMapUrl" column="google_map_url" />
 
+    <result property="isFavorite"   column="is_favorite" />
+
     <result property="diaperChanging" column="diaper_changing" />
     <result property="strollerOk"     column="stroller_ok" />
     <result property="playground"     column="playground" />
@@ -30,13 +32,11 @@
 
 
   <!-- =========================================================
-       Spot + Category + SpotFacility をJOINして一覧取得（検索条件あり）
-       parameterType: SpotSearchCondition
-       price: List<PriceType> → p.value をIN
-       age  : List<AgeGroup>  → a.value をIN
+       Spot + Category + SpotFacility + Favorite をJOINして一覧取得（検索条件あり）
+       condition: SpotSearchCondition
+       userId    : お気に入り判定用
        ========================================================= -->
   <select id="findAllWithCategoryAndFacilities"
-    parameterType="com.famigo.backend.dto.SpotSearchCondition"
     resultMap="SpotListItemResultMap">
 
     SELECT
@@ -49,12 +49,18 @@
     s.target_age     AS target_age,
     s.google_map_url AS google_map_url,
 
+    CASE
+    WHEN fav.spot_id IS NULL THEN 0
+    ELSE 1
+    END AS is_favorite,
+
     f.diaper_changing,
     f.stroller_ok,
     f.playground,
     f.athletics,
     f.water_play,
     f.indoor
+
     FROM
     spots s
     JOIN categories c
@@ -62,6 +68,10 @@
     LEFT JOIN spot_facilities f
     ON s.id = f.spot_id
     AND f.is_deleted = 0
+    LEFT JOIN favorites fav
+    ON fav.spot_id = s.id
+    AND fav.user_id = #{userId}
+    AND fav.is_deleted = 0
 
     <where>
       s.is_deleted = 0
@@ -141,6 +151,8 @@
     <result property="priceType"    column="price_type" />
     <result property="categoryName" column="category_name" />
 
+    <result property="isFavorite"   column="is_favorite" />
+
     <result property="parkingInfo"      column="parking_info" />
     <result property="toiletInfo"       column="toilet_info" />
     <result property="targetAge"        column="target_age" />
@@ -166,7 +178,6 @@
        ID指定でSpotの詳細を1件取得
        ========================================================= -->
   <select id="findDetailById"
-    parameterType="long"
     resultMap="SpotDetailResultMap">
     SELECT
     s.id              AS spot_id,
@@ -175,6 +186,12 @@
     s.area,
     s.price_type,
     c.name            AS category_name,
+
+    CASE
+    WHEN fav.spot_id IS NULL THEN 0
+    ELSE 1
+    END AS is_favorite,
+
     s.parking_info,
     s.toilet_info,
     s.target_age,
@@ -191,6 +208,7 @@
     f.athletics,
     f.water_play,
     f.indoor
+
     FROM
     spots s
     JOIN categories c
@@ -198,6 +216,10 @@
     LEFT JOIN spot_facilities f
     ON s.id = f.spot_id
     AND f.is_deleted = 0
+    LEFT JOIN favorites fav
+    ON fav.spot_id = s.id
+    AND fav.user_id = #{userId}
+    AND fav.is_deleted = 0
     WHERE
     s.is_deleted = 0
     AND s.id = #{id}
