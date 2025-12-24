@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.famigo.backend.mapper.FavoriteMapper">
+
+  <!-- =========================================================
+       お気に入り登録（複合PK(user_id, spot_id)なので、重複時は復活させる）
+       ========================================================= -->
+  <insert id="upsertFavorite">
+    INSERT INTO favorites (
+      user_id,
+      spot_id,
+      created_at,
+      updated_at,
+      is_deleted
+    )
+    VALUES (
+      #{userId},
+      #{spotId},
+      NOW(),
+      NOW(),
+      0
+    )
+    <!-- INSERT時にキー重複が発生した場合は、エラーにせずUPDATEを実行する -->
+    ON DUPLICATE KEY UPDATE
+      is_deleted = 0,
+      updated_at = NOW()
+  </insert>
+
+
+  <!-- =========================================================
+       お気に入り解除（論理削除）
+       ========================================================= -->
+  <update id="logicalDeleteFavorite">
+    UPDATE favorites
+    SET
+      is_deleted = 1,
+      updated_at = NOW()
+    WHERE
+      user_id = #{userId}
+      AND spot_id = #{spotId}
+      AND is_deleted = 0
+  </update>
+
+
+  <!-- =========================================================
+       お気に入り状態の判定
+       ========================================================= -->
+  <select id="existsActiveFavorite" resultType="boolean">
+    SELECT
+      CASE
+        WHEN COUNT(*) > 0 THEN TRUE
+        ELSE FALSE
+      END
+    FROM favorites
+    WHERE
+      user_id = #{userId}
+      AND spot_id = #{spotId}
+      AND is_deleted = 0
+  </select>
+
+</mapper>

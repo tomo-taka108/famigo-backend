@@ -40,26 +40,26 @@
     resultMap="SpotListItemResultMap">
 
     SELECT
-    s.id             AS spot_id,
-    s.name           AS spot_name,
-    s.address        AS address,
-    s.area           AS area,
-    s.price_type     AS price_type,
-    c.name           AS category_name,
-    s.target_age     AS target_age,
-    s.google_map_url AS google_map_url,
+      s.id             AS spot_id,
+      s.name           AS spot_name,
+      s.address        AS address,
+      s.area           AS area,
+      s.price_type     AS price_type,
+      c.name           AS category_name,
+      s.target_age     AS target_age,
+      s.google_map_url AS google_map_url,
 
-    CASE
-    WHEN fav.spot_id IS NULL THEN 0
-    ELSE 1
-    END AS is_favorite,
+      CASE
+      WHEN fav.spot_id IS NULL THEN 0
+      ELSE 1
+      END AS is_favorite,
 
-    f.diaper_changing,
-    f.stroller_ok,
-    f.playground,
-    f.athletics,
-    f.water_play,
-    f.indoor
+      f.diaper_changing,
+      f.stroller_ok,
+      f.playground,
+      f.athletics,
+      f.water_play,
+      f.indoor
 
     FROM
     spots s
@@ -180,34 +180,34 @@
   <select id="findDetailById"
     resultMap="SpotDetailResultMap">
     SELECT
-    s.id              AS spot_id,
-    s.name,
-    s.address,
-    s.area,
-    s.price_type,
-    c.name            AS category_name,
+      s.id              AS spot_id,
+      s.name,
+      s.address,
+      s.area,
+      s.price_type,
+      c.name            AS category_name,
 
-    CASE
-    WHEN fav.spot_id IS NULL THEN 0
-    ELSE 1
-    END AS is_favorite,
+      CASE
+      WHEN fav.spot_id IS NULL THEN 0
+      ELSE 1
+      END AS is_favorite,
 
-    s.parking_info,
-    s.toilet_info,
-    s.target_age,
-    s.staying_time,
-    s.convenience_store,
-    s.restaurant_info,
-    s.google_map_url,
-    s.closed_days,
-    s.official_url,
-    s.notes,
-    f.diaper_changing,
-    f.stroller_ok,
-    f.playground,
-    f.athletics,
-    f.water_play,
-    f.indoor
+      s.parking_info,
+      s.toilet_info,
+      s.target_age,
+      s.staying_time,
+      s.convenience_store,
+      s.restaurant_info,
+      s.google_map_url,
+      s.closed_days,
+      s.official_url,
+      s.notes,
+      f.diaper_changing,
+      f.stroller_ok,
+      f.playground,
+      f.athletics,
+      f.water_play,
+      f.indoor
 
     FROM
     spots s
@@ -221,8 +221,8 @@
     AND fav.user_id = #{userId}
     AND fav.is_deleted = 0
     WHERE
-    s.is_deleted = 0
-    AND s.id = #{id}
+      s.is_deleted = 0
+      AND s.id = #{id}
   </select>
 
 </mapper>
