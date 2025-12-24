@@ -18,7 +18,7 @@ public interface SpotMapper {
    * @return スポットの一覧（SpotListItemDto のリスト）
    */
   List<SpotListItemDto> findAllWithCategoryAndFacilities(
-      @Param("condition") SpotSearchCondition condition
+      @Param("condition") SpotSearchCondition condition,
       @Param("userId") Long userId
   );
 
@@ -30,7 +30,7 @@ public interface SpotMapper {
    * @return スポット詳細データ（SpotDetailDto）
    */
   SpotDetailDto findDetailById(
-      @Param("id") Long id
+      @Param("id") Long id,
       @Param("userId") Long userId
   );
 
