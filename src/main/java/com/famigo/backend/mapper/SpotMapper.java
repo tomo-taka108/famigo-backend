@@ -11,19 +11,27 @@ import org.apache.ibatis.annotations.Param;
 public interface SpotMapper {
 
   /**
-   * カテゴリ情報＋設備情報を含めたスポット一覧を取得するメソッド （トップページの一覧表示用）
+   * カテゴリ情報＋設備情報＋お気に入り情報を含めたスポット一覧を取得するメソッド （トップページの一覧表示用）
    *
+   * @param condition 検索条件
+   * @param userId    お気に入り判定対象のユーザーID（ログイン未実装の場合は固定値）
    * @return スポットの一覧（SpotListItemDto のリスト）
    */
   List<SpotListItemDto> findAllWithCategoryAndFacilities(
-      @Param("condition") SpotSearchCondition condition);
+      @Param("condition") SpotSearchCondition condition,
+      @Param("userId") Long userId
+  );
 
   /**
-   * 指定したスポットIDの「スポット詳細情報」を取得するメソッド （スポット詳細画面向け：基本情報＋カテゴリ＋設備＋レビュー情報など。レビューは今後拡張予定）
+   * 指定したスポットIDの「スポット詳細情報」を取得するメソッド
    *
-   * @param id スポットID
+   * @param id     スポットID
+   * @param userId お気に入り判定対象のユーザーID（ログイン未実装の場合は固定値）
    * @return スポット詳細データ（SpotDetailDto）
    */
-  SpotDetailDto findDetailById(@Param("id") Long id);
+  SpotDetailDto findDetailById(
+      @Param("id") Long id,
+      @Param("userId") Long userId
+  );
 
 }

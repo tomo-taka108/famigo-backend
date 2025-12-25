@@ -20,6 +20,8 @@
     <result property="targetAge"    column="target_age" />
     <result property="googleMapUrl" column="google_map_url" />
 
+    <result property="isFavorite"   column="is_favorite" />
+
     <result property="diaperChanging" column="diaper_changing" />
     <result property="strollerOk"     column="stroller_ok" />
     <result property="playground"     column="playground" />
@@ -30,31 +32,35 @@
 
 
   <!-- =========================================================
-       Spot + Category + SpotFacility をJOINして一覧取得（検索条件あり）
-       parameterType: SpotSearchCondition
-       price: List<PriceType> → p.value をIN
-       age  : List<AgeGroup>  → a.value をIN
+       Spot + Category + SpotFacility + Favorite をJOINして一覧取得（検索条件あり）
+       condition: SpotSearchCondition
+       userId    : お気に入り判定用
        ========================================================= -->
   <select id="findAllWithCategoryAndFacilities"
-    parameterType="com.famigo.backend.dto.SpotSearchCondition"
     resultMap="SpotListItemResultMap">
 
     SELECT
-    s.id             AS spot_id,
-    s.name           AS spot_name,
-    s.address        AS address,
-    s.area           AS area,
-    s.price_type     AS price_type,
-    c.name           AS category_name,
-    s.target_age     AS target_age,
-    s.google_map_url AS google_map_url,
+      s.id             AS spot_id,
+      s.name           AS spot_name,
+      s.address        AS address,
+      s.area           AS area,
+      s.price_type     AS price_type,
+      c.name           AS category_name,
+      s.target_age     AS target_age,
+      s.google_map_url AS google_map_url,
 
-    f.diaper_changing,
-    f.stroller_ok,
-    f.playground,
-    f.athletics,
-    f.water_play,
-    f.indoor
+      CASE
+      WHEN fav.spot_id IS NULL THEN 0
+      ELSE 1
+      END AS is_favorite,
+
+      f.diaper_changing,
+      f.stroller_ok,
+      f.playground,
+      f.athletics,
+      f.water_play,
+      f.indoor
+
     FROM
     spots s
     JOIN categories c
@@ -62,61 +68,65 @@
     LEFT JOIN spot_facilities f
     ON s.id = f.spot_id
     AND f.is_deleted = 0
+    LEFT JOIN favorites fav
+    ON fav.spot_id = s.id
+    AND fav.user_id = #{userId}
+    AND fav.is_deleted = 0
 
     <where>
       s.is_deleted = 0
 
       <!-- キーワード（名前・住所・エリアをまとめて検索） -->
-      <if test="keyword != null and keyword != ''">
+      <if test="condition.keyword != null and condition.keyword != ''">
         AND (
-        s.name LIKE CONCAT('%', #{keyword}, '%')
-        OR s.address LIKE CONCAT('%', #{keyword}, '%')
-        OR s.area LIKE CONCAT('%', #{keyword}, '%')
+        s.name LIKE CONCAT('%', #{condition.keyword}, '%')
+        OR s.address LIKE CONCAT('%', #{condition.keyword}, '%')
+        OR s.area LIKE CONCAT('%', #{condition.keyword}, '%')
         )
       </if>
 
       <!-- カテゴリID指定（複数選択の IN 条件） -->
-      <if test="categoryIds != null and categoryIds.size() > 0">
+      <if test="condition.categoryIds != null and condition.categoryIds.size() > 0">
         AND s.category_id IN
-        <foreach collection="categoryIds" item="cid" open="(" separator="," close=")">
+        <foreach collection="condition.categoryIds" item="cid" open="(" separator="," close=")">
           #{cid}
         </foreach>
       </if>
 
       <!-- 予算（List<PriceType>：DB保存値（日本語ラベル）でIN） -->
-      <if test="price != null and price.size() > 0">
+      <if test="condition.price != null and condition.price.size() > 0">
         AND s.price_type IN
-        <foreach collection="price" item="p" open="(" separator="," close=")">
+        <foreach collection="condition.price" item="p" open="(" separator="," close=")">
           #{p.value}
         </foreach>
       </if>
 
       <!-- 対象年齢（List<AgeGroup>：DB保存値（日本語ラベル）でIN） -->
-      <if test="age != null and age.size() > 0">
+      <if test="condition.age != null and condition.age.size() > 0">
         AND s.target_age IN
-        <foreach collection="age" item="a" open="(" separator="," close=")">
+        <foreach collection="condition.age" item="a" open="(" separator="," close=")">
           #{a.value}
         </foreach>
       </if>
 
       <!-- 設備（選択されたものはAND条件で絞り込む） -->
-      <if test="facilities != null and facilities.size() > 0">
-        <if test="facilities.contains('diaper')">
+      <if test="condition.facilities != null and condition.facilities.size() > 0">
+        <if test="condition.facilities.contains('diaper')">
           AND f.diaper_changing = 1
         </if>
-        <if test="facilities.contains('stroller')">
+        <if test="condition.facilities.contains('stroller')">
           AND f.stroller_ok = 1
         </if>
-        <if test="facilities.contains('playground')">
+        <if test="condition.facilities.contains('playground')">
           AND f.playground = 1
         </if>
-        <if test="facilities.contains('athletics')">
+        <if test="condition.facilities.contains('athletics')">
           AND f.athletics = 1
         </if>
-        <if test="facilities.contains('water')">
+        <if test="condition.facilities.contains('water')">
           AND f.water_play = 1
         </if>
-        <if test="facilities.contains('indoor')">
+        <if test="condition.facilities.contains('indoor')">
           AND f.indoor = 1
         </if>
       </if>
@@ -140,6 +150,8 @@
     <result property="area"         column="area" />
     <result property="priceType"    column="price_type" />
     <result property="categoryName" column="category_name" />
+
+    <result property="isFavorite"   column="is_favorite" />
 
     <result property="parkingInfo"      column="parking_info" />
     <result property="toiletInfo"       column="toilet_info" />
@@ -166,31 +178,37 @@
        ID指定でSpotの詳細を1件取得
        ========================================================= -->
   <select id="findDetailById"
-    parameterType="long"
     resultMap="SpotDetailResultMap">
     SELECT
-    s.id              AS spot_id,
-    s.name,
-    s.address,
-    s.area,
-    s.price_type,
-    c.name            AS category_name,
-    s.parking_info,
-    s.toilet_info,
-    s.target_age,
-    s.staying_time,
-    s.convenience_store,
-    s.restaurant_info,
-    s.google_map_url,
-    s.closed_days,
-    s.official_url,
-    s.notes,
-    f.diaper_changing,
-    f.stroller_ok,
-    f.playground,
-    f.athletics,
-    f.water_play,
-    f.indoor
+      s.id              AS spot_id,
+      s.name,
+      s.address,
+      s.area,
+      s.price_type,
+      c.name            AS category_name,
+
+      CASE
+      WHEN fav.spot_id IS NULL THEN 0
+      ELSE 1
+      END AS is_favorite,
+
+      s.parking_info,
+      s.toilet_info,
+      s.target_age,
+      s.staying_time,
+      s.convenience_store,
+      s.restaurant_info,
+      s.google_map_url,
+      s.closed_days,
+      s.official_url,
+      s.notes,
+      f.diaper_changing,
+      f.stroller_ok,
+      f.playground,
+      f.athletics,
+      f.water_play,
+      f.indoor
+
     FROM
     spots s
     JOIN categories c
@@ -198,9 +216,13 @@
     LEFT JOIN spot_facilities f
     ON s.id = f.spot_id
     AND f.is_deleted = 0
+    LEFT JOIN favorites fav
+    ON fav.spot_id = s.id
+    AND fav.user_id = #{userId}
+    AND fav.is_deleted = 0
     WHERE
-    s.is_deleted = 0
-    AND s.id = #{id}
+      s.is_deleted = 0
+      AND s.id = #{id}
   </select>
 
 </mapper>

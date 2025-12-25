@@ -8,8 +8,8 @@
   <!-- カテゴリ一覧取得（categories に論理削除カラムは無い） -->
   <select id="selectAll" resultType="com.famigo.backend.dto.CategoryDto">
     SELECT
-    id,
-    name
+      id,
+      name
     FROM categories
     ORDER BY id
   </select>

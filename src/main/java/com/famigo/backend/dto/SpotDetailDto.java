@@ -32,6 +32,9 @@ public class SpotDetailDto {
   @Schema(description = "カテゴリ名（categories.name）", example = "公園")
   private String categoryName;                         // カテゴリ名
 
+  @Schema(description = "お気に入り済みかどうか（favorites）", example = "true")
+  private Boolean isFavorite;                          // お気に入り状態
+
   @Schema(description = "駐車場情報（spots.parking_info）")
   private String parkingInfo;                          // 駐車場情報メモ
 

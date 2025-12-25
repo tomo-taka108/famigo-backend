@@ -29,16 +29,16 @@
   <!-- ============================ -->
   <select id="findBySpotId" resultMap="SpotFacilityResultMap">
     SELECT
-    spot_id,
-    diaper_changing,
-    stroller_ok,
-    playground,
-    athletics,
-    water_play,
-    indoor,
-    created_at,
-    updated_at,
-    is_deleted
+      spot_id,
+      diaper_changing,
+      stroller_ok,
+      playground,
+      athletics,
+      water_play,
+      indoor,
+      created_at,
+      updated_at,
+      is_deleted
     FROM spot_facilities
     WHERE spot_id = #{spotId}
     AND is_deleted = 0

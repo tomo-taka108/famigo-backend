@@ -39,6 +39,9 @@ public class SpotListItemDto {
   @Schema(description = "GoogleマップURL（spots.google_map_url）")
   private String googleMapUrl;
 
+  @Schema(description = "お気に入り済みかどうか（favorites）", example = "true")
+  private Boolean isFavorite;
+
   // ▼ spot_facilities テーブル由来の設備フラグ
   @Schema(description = "オムツ替えスペースの有無（diaper_changing）", example = "true")
   private Boolean diaperChanging;
