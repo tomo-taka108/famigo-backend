@@ -1,27 +1,64 @@
 package com.famigo.backend.controller;
 
+import com.famigo.backend.dto.SpotListItemDto;
 import com.famigo.backend.service.FavoriteService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 「スポットのお気に入り登録/解除」を提供する REST API の Controller クラスです。
- * スポット一覧・詳細画面から呼び出されます。
+ * 「お気に入り一覧取得」および「スポットのお気に入り登録/解除」を提供する REST API の Controller クラスです。
+ * お気に入り一覧画面、およびスポット一覧・詳細画面から呼び出されます。
  */
 @RestController
-@RequestMapping("/spots")
 @CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
 public class FavoriteController {
 
   private final FavoriteService favoriteService;
+
+
+  /**
+   * お気に入り一覧（お気に入りしたスポット一覧）を取得するエンドポイント。
+   *
+   * @return お気に入りスポット一覧（SpotListItemDto のリスト）
+   */
+  @Operation(
+      summary = "お気に入り一覧を取得（Read）",
+      description = "ログイン未実装のため固定ユーザー（id=1）の、お気に入り（favorites.is_deleted=0）"
+          + "かつスポット有効（spots.is_deleted=0）の一覧を返します。"
+          + " 並び順は favorites.updated_at DESC（なければ created_at DESC）です。",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "お気に入り一覧取得成功",
+              content = @Content(
+                  mediaType = "application/json",
+                  array = @ArraySchema(
+                      schema = @Schema(implementation = SpotListItemDto.class)
+                  )
+              )
+          )
+          // 将来的に 400 / 404 / 500 などをハンドリングする場合は、
+          // ここに ApiResponse を追加していく想定
+      }
+  )
+  @GetMapping("/favorites")
+  public List<SpotListItemDto> getFavorites() {
+    return favoriteService.getFavorites();
+  }
+
 
   /**
    * 指定したスポットIDのスポットをお気に入り登録するエンドポイント。
@@ -38,10 +75,11 @@ public class FavoriteController {
           )
       }
   )
-  @PostMapping("/{spotId}/favorites")
+  @PostMapping("/spots/{spotId}/favorites")
   public void addFavorite(@PathVariable Long spotId) {
     favoriteService.addFavorite(spotId);
   }
+
 
   /**
    * 指定したスポットIDのスポットをお気に入り解除（論理削除）するエンドポイント。
@@ -58,7 +96,7 @@ public class FavoriteController {
           )
       }
   )
-  @DeleteMapping("/{spotId}/favorites")
+  @DeleteMapping("/spots/{spotId}/favorites")
   public void removeFavorite(@PathVariable Long spotId) {
     favoriteService.removeFavorite(spotId);
   }
