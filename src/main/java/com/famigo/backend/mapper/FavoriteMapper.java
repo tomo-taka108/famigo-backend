@@ -1,5 +1,7 @@
 package com.famigo.backend.mapper;
 
+import com.famigo.backend.dto.SpotListItemDto;
+import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -40,6 +42,16 @@ public interface FavoriteMapper {
   boolean existsActiveFavorite(
       @Param("userId") Long userId,
       @Param("spotId") Long spotId
+  );
+
+  /**
+   * お気に入り一覧（お気に入りしたスポット一覧）を取得
+   *
+   * @param userId ユーザーID
+   * @return お気に入りスポット一覧（SpotListItemDto のリスト）
+   */
+  List<SpotListItemDto> findFavoriteSpots(
+      @Param("userId") Long userId
   );
 
 }

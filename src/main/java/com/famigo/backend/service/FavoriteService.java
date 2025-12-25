@@ -1,6 +1,8 @@
 package com.famigo.backend.service;
 
+import com.famigo.backend.dto.SpotListItemDto;
 import com.famigo.backend.mapper.FavoriteMapper;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +41,15 @@ public class FavoriteService {
    */
   public boolean isFavorite(Long spotId) {
     return favoriteMapper.existsActiveFavorite(DEMO_USER_ID, spotId);
+  }
+
+  /**
+   * お気に入り一覧を取得
+   *
+   * @return お気に入りスポット一覧（SpotListItemDto のリスト）
+   */
+  public List<SpotListItemDto> getFavorites() {
+    return favoriteMapper.findFavoriteSpots(DEMO_USER_ID);
   }
 
 }

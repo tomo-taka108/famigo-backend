@@ -46,7 +46,7 @@
 
 
   <!-- =========================================================
-       お気に入り状態の判定
+       お気に入り済みかどうかを判定
        ========================================================= -->
   <select id="existsActiveFavorite" resultType="boolean">
     SELECT
@@ -59,6 +59,56 @@
       user_id = #{userId}
       AND spot_id = #{spotId}
       AND is_deleted = 0
+  </select>
+
+
+  <!-- =========================================================
+       お気に入り一覧（お気に入りしたスポット一覧）を取得
+       - favorites.is_deleted = 0
+       - spots.is_deleted = 0
+       - ORDER BY favorites.updated_at DESC（なければ created_at DESC）
+       - 返却DTOは SpotListItemDto（既存ResultMapを再利用）
+       ========================================================= -->
+  <select id="findFavoriteSpots"
+    resultMap="com.famigo.backend.mapper.SpotMapper.SpotListItemResultMap">
+
+    SELECT
+      s.id             AS spot_id,
+      s.name           AS spot_name,
+      s.address        AS address,
+      s.area           AS area,
+      s.price_type     AS price_type,
+      c.name           AS category_name,
+      s.target_age     AS target_age,
+      s.google_map_url AS google_map_url,
+
+      1 AS is_favorite,
+
+      f.diaper_changing,
+      f.stroller_ok,
+      f.playground,
+      f.athletics,
+      f.water_play,
+      f.indoor
+
+    FROM
+      favorites fav
+      JOIN spots s
+        ON fav.spot_id = s.id
+        AND s.is_deleted = 0
+      JOIN categories c
+        ON s.category_id = c.id
+      LEFT JOIN spot_facilities f
+        ON s.id = f.spot_id
+        AND f.is_deleted = 0
+
+    WHERE
+      fav.user_id = #{userId}
+      AND fav.is_deleted = 0
+
+    ORDER BY
+      COALESCE(fav.updated_at, fav.created_at) DESC
+
   </select>
 
 </mapper>
