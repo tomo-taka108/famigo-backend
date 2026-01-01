@@ -14,29 +14,28 @@ public class SpotService {
 
   private final SpotMapper spotMapper;
 
-  // ログイン未実装のため、MVPでは「固定ユーザー（例：id=1）」としてお気に入りを扱う
-  private static final Long DEMO_USER_ID = 1L;
-
   /**
    * スポット一覧（カテゴリ・設備情報をJOIN済）のデータを取得するメソッド
    *
    * @param condition 検索条件（null項目は条件なしとして扱う）
+   * @param userId    ユーザーID（ログイン時のみ指定。未ログインの場合はnullを渡す）
    * @return スポット一覧（SpotListItemDto のリスト）
    */
-  public List<SpotListItemDto> getSpotList(SpotSearchCondition condition) {
-    return spotMapper.findAllWithCategoryAndFacilities(condition, DEMO_USER_ID);
-    // Mapperに条件＋ユーザーIDを渡して一覧取得
+  public List<SpotListItemDto> getSpotList(SpotSearchCondition condition, Long userId) {
+    return spotMapper.findAllWithCategoryAndFacilities(condition, userId);
+    // Mapperに条件＋（ログイン時のみ）ユーザーIDを渡して一覧取得
   }
 
   /**
    * 指定したスポットIDのスポット詳細情報（基本情報＋カテゴリ＋設備＋お気に入り状態）を取得するメソッド
    *
-   * @param id スポットID
+   * @param id     スポットID
+   * @param userId ユーザーID（ログイン時のみ指定。未ログインの場合はnullを渡す）
    * @return スポット詳細データ（SpotDetailDto）
    */
-  public SpotDetailDto getSpotDetail(Long id) {
-    return spotMapper.findDetailById(id, DEMO_USER_ID);
-    // MapperにID＋ユーザーIDを渡して詳細取得
+  public SpotDetailDto getSpotDetail(Long id, Long userId) {
+    return spotMapper.findDetailById(id, userId);
+    // MapperにID＋（ログイン時のみ）ユーザーIDを渡して詳細取得
   }
 
 }
