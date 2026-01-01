@@ -1,0 +1,94 @@
+package com.famigo.backend.controller;
+
+import com.famigo.backend.dto.auth.LoginRequest;
+import com.famigo.backend.dto.auth.LoginResponse;
+import com.famigo.backend.dto.auth.MeResponse;
+import com.famigo.backend.security.AppUserPrincipal;
+import com.famigo.backend.service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.CrossOrigin;   // ★ CORS許可用アノテーションをインポート
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * 「認証（ログイン）・ログイン中ユーザー情報」を提供する REST API の Controller クラスです。
+ * フロントエンドのログイン画面や、ログイン状態チェック（/auth/me）から呼び出されます。
+ */
+@RestController
+@RequestMapping("/auth")   // このコントローラーで扱うURLの共通プレフィックスを設定
+@CrossOrigin(origins = "http://localhost:5173")    // Viteのフロントからのアクセスを許可
+@RequiredArgsConstructor    // finalフィールドを引数に持つコンストラクタを自動生成
+public class AuthController {
+
+  private final AuthService authService;
+
+  /**
+   * ログイン（JWT発行）を行うエンドポイント。
+   * email / password が正しい場合に JWT を発行し、フロントエンドへ返却します。
+   *
+   * @param request ログイン要求（email / password）
+   * @return ログイン結果（JWTなど：LoginResponse）
+   */
+  @Operation(
+      summary = "ログイン（JWT発行）",
+      description = "email / password が正しい場合に JWT を発行します。",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "ログイン成功",
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = LoginResponse.class)
+              )
+          ),
+          @ApiResponse(
+              responseCode = "401",
+              description = "認証失敗（email/password不一致）"
+          )
+      }
+  )
+  @PostMapping("/login")
+  public LoginResponse login(@RequestBody @Valid LoginRequest request) {
+    return authService.login(request);
+  }
+
+
+  /**
+   * ログイン中ユーザー情報（自分のユーザー情報）を取得するエンドポイント。
+   * Authorization: Bearer {token} が必要です。
+   *
+   * @param principal 認証済みユーザー情報（JWTから生成された認証プリンシパル）
+   * @return ログイン中ユーザー情報（MeResponse）
+   */
+  @Operation(
+      summary = "ログイン中ユーザー情報を取得（JWT必須）",
+      description = "Authorization: Bearer {token} が必要です。",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "取得成功",
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = MeResponse.class)
+              )
+          ),
+          @ApiResponse(
+              responseCode = "401",
+              description = "未ログイン / トークン不正"
+          )
+      }
+  )
+  @GetMapping("/me")
+  public MeResponse me(@AuthenticationPrincipal AppUserPrincipal principal) {
+    return authService.me(principal.getUserId());
+  }
+}
