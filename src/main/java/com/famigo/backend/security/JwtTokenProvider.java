@@ -71,14 +71,14 @@ public class JwtTokenProvider {
 
     return Jwts.builder()
         // subject：JWTの「主語」。ここでは email を採用
-        .setSubject(email)
+        .subject(email)
         // claim：自作フィールド（uid / role を入れておく）
         .claim("uid", userId)
         .claim("role", role)
-        .setIssuedAt(now)
-        .setExpiration(expiry)
+        .issuedAt(now)
+        .expiration(expiry)
         // 署名：改ざんされていないことを保証する
-        .signWith(secretKey, SignatureAlgorithm.HS256)
+        .signWith(secretKey)
         .compact();
   }
 
