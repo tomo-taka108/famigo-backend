@@ -27,14 +27,13 @@ public class ReviewService {
   /**
    * スポットIDとユーザーIDを紐づけてレビューを新規登録するメソッド
    *
-   * @param spotId スポットID
+   * @param spotId  スポットID
+   * @param userId  ユーザーID（ログインユーザー）
    * @param request レビュー投稿リクエストDTO
-   * ログイン機能を未実装のため、userIdは仮固定
    */
   @Transactional
-  public void createReview(Long spotId, ReviewCreateRequest request) {
-    Long fixedUserId = 1L; // ログイン機能未実装のためユーザーIDは仮固定
-    reviewMapper.insertReview(spotId, fixedUserId, request);
+  public void createReview(Long spotId, Long userId, ReviewCreateRequest request) {
+    reviewMapper.insertReview(spotId, userId, request);
   }
 
 }
