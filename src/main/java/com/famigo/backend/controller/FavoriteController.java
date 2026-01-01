@@ -1,6 +1,7 @@
 package com.famigo.backend.controller;
 
 import com.famigo.backend.dto.SpotListItemDto;
+import com.famigo.backend.security.AppUserPrincipal;
 import com.famigo.backend.service.FavoriteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -9,12 +10,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -32,11 +33,12 @@ public class FavoriteController {
   /**
    * お気に入り一覧（お気に入りしたスポット一覧）を取得するエンドポイント。
    *
+   * @param principal ログイン中ユーザー情報（JWTから復元）
    * @return お気に入りスポット一覧（SpotListItemDto のリスト）
    */
   @Operation(
       summary = "お気に入り一覧を取得（Read）",
-      description = "ログイン未実装のため固定ユーザー（id=1）の、お気に入り（favorites.is_deleted=0）"
+      description = "ログイン中ユーザーのお気に入り（favorites.is_deleted=0）"
           + "かつスポット有効（spots.is_deleted=0）の一覧を返します。"
           + " 並び順は favorites.updated_at DESC（なければ created_at DESC）です。",
       responses = {
@@ -50,20 +52,21 @@ public class FavoriteController {
                   )
               )
           )
-          // 将来的に 400 / 404 / 500 などをハンドリングする場合は、
-          // ここに ApiResponse を追加していく想定
+          // 将来的に 400 / 404 / 500 などをハンドリングする場合は、ここに ApiResponse を追加していく想定
       }
   )
   @GetMapping("/favorites")
-  public List<SpotListItemDto> getFavorites() {
-    return favoriteService.getFavorites();
+  public List<SpotListItemDto> getFavorites(@AuthenticationPrincipal AppUserPrincipal principal) {
+    Long userId = principal.getUserId();
+    return favoriteService.getFavorites(userId);
   }
 
 
   /**
    * 指定したスポットIDのスポットをお気に入り登録するエンドポイント。
    *
-   * @param spotId 対象のスポットID
+   * @param spotId    対象のスポットID
+   * @param principal ログイン中ユーザー情報（JWTから復元）
    */
   @Operation(
       summary = "スポット1件をお気に入り登録（Create/復活）【スポットID指定】",
@@ -76,15 +79,20 @@ public class FavoriteController {
       }
   )
   @PostMapping("/spots/{spotId}/favorites")
-  public void addFavorite(@PathVariable Long spotId) {
-    favoriteService.addFavorite(spotId);
+  public void addFavorite(
+      @PathVariable Long spotId,
+      @AuthenticationPrincipal AppUserPrincipal principal
+  ) {
+    Long userId = principal.getUserId();
+    favoriteService.addFavorite(userId, spotId);
   }
 
 
   /**
    * 指定したスポットIDのスポットをお気に入り解除（論理削除）するエンドポイント。
    *
-   * @param spotId 対象のスポットID
+   * @param spotId    対象のスポットID
+   * @param principal ログイン中ユーザー情報（JWTから復元）
    */
   @Operation(
       summary = "スポット1件をお気に入り解除（論理削除）【スポットID指定】",
@@ -97,8 +105,12 @@ public class FavoriteController {
       }
   )
   @DeleteMapping("/spots/{spotId}/favorites")
-  public void removeFavorite(@PathVariable Long spotId) {
-    favoriteService.removeFavorite(spotId);
+  public void removeFavorite(
+      @PathVariable Long spotId,
+      @AuthenticationPrincipal AppUserPrincipal principal
+  ) {
+    Long userId = principal.getUserId();
+    favoriteService.removeFavorite(userId, spotId);
   }
 
 }
