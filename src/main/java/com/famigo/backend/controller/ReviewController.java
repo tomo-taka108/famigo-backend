@@ -2,6 +2,7 @@ package com.famigo.backend.controller;
 
 import com.famigo.backend.dto.ReviewCreateRequest;
 import com.famigo.backend.dto.ReviewListItemDto;
+import com.famigo.backend.security.AppUserPrincipal;
 import com.famigo.backend.service.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -11,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 「スポット一件のレビュー一覧」を提供する REST API の Controller クラスです。 スポット詳細画面から呼び出されます。
+ * 「スポット一件のレビュー一覧」を提供する REST API の Controller クラスです。スポット詳細画面から呼び出されます。
  */
 @RestController
 @RequestMapping("/spots")   // このコントローラーで扱うURLの共通プレフィックスを設定
@@ -50,8 +52,7 @@ public class ReviewController {
                   )
               )
           )
-          // 将来的に 400 / 404 / 500 などをハンドリングする場合は、
-          // ここに ApiResponse を追加していく想定
+          // 将来的に 400 / 404 / 500 などをハンドリングする場合は、ここに ApiResponse を追加していく想定
       }
   )
 
@@ -66,6 +67,7 @@ public class ReviewController {
    *
    * @param spotId  投稿対象のスポットID
    * @param request レビュー投稿内容（バリデーション対象）
+   * @param principal ログイン中ユーザー情報（JWTから復元）
    */
   @Operation(
       summary = "スポット1件についてレビュー投稿（Create）【スポットID指定】",
@@ -75,16 +77,17 @@ public class ReviewController {
               responseCode = "200",
               description = "レビュー投稿成功"
           )
-          // 将来的に 400 / 404 / 500 などをハンドリングする場合は、
-          // ここに ApiResponse を追加していく想定
+          // 将来的に 400 / 404 / 500 などをハンドリングする場合は、ここに ApiResponse を追加していく想定
       }
   )
   @PostMapping("/{spotId}/reviews")
   public void createReview(
       @PathVariable Long spotId,
-      @RequestBody @Valid ReviewCreateRequest request
+      @RequestBody @Valid ReviewCreateRequest request,
+      @AuthenticationPrincipal AppUserPrincipal principal
   ) {
-    reviewService.createReview(spotId, request);
+    Long userId = principal.getUserId();
+    reviewService.createReview(spotId, userId, request);
   }
 
 }
