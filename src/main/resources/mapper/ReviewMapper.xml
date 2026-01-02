@@ -7,8 +7,7 @@
 
   <!--
     スポットIDに紐づくレビュー一覧取得
-    ・論理削除レビュー（is_deleted = 1）は除外
-    ・ユーザーが退会 / 削除されている場合は「退会済みユーザー」と表示
+    ユーザーが退会 / 削除されている場合は「退会済みユーザー」と表示
   -->
   <select id="selectReviewsBySpotId" resultType="com.famigo.backend.dto.ReviewListItemDto">
     SELECT
@@ -26,15 +25,22 @@
       ELSE COALESCE(u.name, '退会済みユーザー')
       END           AS userName,
 
+      r.child_age_group AS childAgeGroup,
       r.rating      AS rating,
+      r.rating_cost AS ratingCost,
+      r.crowd_level AS crowdLevel,
+      r.toilet_cleanliness AS toiletCleanliness,
+      r.stroller_ease AS strollerEase,
       r.review_text AS reviewText,
-      r.created_at  AS createdAt
+      r.cost_total  AS costTotal,
+      r.created_at  AS createdAt,
+      r.updated_at  AS updatedAt
 
     FROM reviews r
     LEFT JOIN users u
-    ON u.id = r.user_id
+      ON u.id = r.user_id
     WHERE r.spot_id = #{spotId}
-    AND r.is_deleted = 0
+      AND r.is_deleted = 0
     ORDER BY r.created_at DESC
   </select>
 
@@ -73,5 +79,59 @@
       0
     )
   </insert>
+
+
+  <!--
+    レビュー編集・削除の認可判定用情報取得
+    ・論理削除済みも含めて取得（Service側で 404 判定に使う）
+  -->
+  <select id="selectReviewAuthInfo" resultType="com.famigo.backend.dto.ReviewAuthInfoDto">
+    SELECT
+      id       AS id,
+      spot_id  AS spotId,
+      user_id  AS userId,
+      is_deleted AS isDeleted
+    FROM reviews
+    WHERE id = #{reviewId}
+  </select>
+
+
+  <!--
+    レビュー編集（Update）
+    ・spot_id も条件に入れて「スポット跨ぎ更新」を防止
+    ・論理削除済みは更新しない
+  -->
+  <update id="updateReview">
+    UPDATE reviews
+    SET
+      child_age_group     = #{request.childAgeGroup.value},
+      rating              = #{request.rating},
+      rating_cost         = #{request.ratingCost},
+      crowd_level         = #{request.crowdLevel},
+      toilet_cleanliness  = #{request.toiletCleanliness},
+      stroller_ease       = #{request.strollerEase},
+      review_text         = #{request.reviewText},
+      cost_total          = #{request.costTotal},
+      updated_at          = NOW()
+    WHERE id = #{reviewId}
+    AND spot_id = #{spotId}
+    AND is_deleted = 0
+  </update>
+
+
+  <!--
+    レビュー削除（論理削除）
+    ・spot_id も条件に入れて「スポット跨ぎ削除」を防止
+    ・既に削除済みは更新しない
+  -->
+  <update id="softDeleteReview">
+    UPDATE reviews
+    SET
+      is_deleted = 1,
+      updated_at = NOW()
+    WHERE id = #{reviewId}
+    AND spot_id = #{spotId}
+    AND is_deleted = 0
+  </update>
 
 </mapper>
