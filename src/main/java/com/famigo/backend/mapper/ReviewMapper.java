@@ -1,6 +1,6 @@
 package com.famigo.backend.mapper;
 
-import com.famigo.backend.dto.ReviewCreateRequest;
+import com.famigo.backend.dto.ReviewUpsertRequest;
 import com.famigo.backend.dto.ReviewListItemDto;
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
@@ -27,7 +27,7 @@ public interface ReviewMapper {
   void insertReview(
       @Param("spotId") Long spotId,
       @Param("userId") Long userId,
-      @Param("request") ReviewCreateRequest request
+      @Param("request") ReviewUpsertRequest request
   );
 
 }

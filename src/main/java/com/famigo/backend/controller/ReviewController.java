@@ -1,6 +1,6 @@
 package com.famigo.backend.controller;
 
-import com.famigo.backend.dto.ReviewCreateRequest;
+import com.famigo.backend.dto.ReviewUpsertRequest;
 import com.famigo.backend.dto.ReviewListItemDto;
 import com.famigo.backend.security.AppUserPrincipal;
 import com.famigo.backend.service.ReviewService;
@@ -83,7 +83,7 @@ public class ReviewController {
   @PostMapping("/{spotId}/reviews")
   public void createReview(
       @PathVariable Long spotId,
-      @RequestBody @Valid ReviewCreateRequest request,
+      @RequestBody @Valid ReviewUpsertRequest request,
       @AuthenticationPrincipal AppUserPrincipal principal
   ) {
     Long userId = principal.getUserId();

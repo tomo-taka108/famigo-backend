@@ -1,6 +1,6 @@
 package com.famigo.backend.service;
 
-import com.famigo.backend.dto.ReviewCreateRequest;
+import com.famigo.backend.dto.ReviewUpsertRequest;
 import com.famigo.backend.dto.ReviewListItemDto;
 import com.famigo.backend.mapper.ReviewMapper;
 import java.util.List;
@@ -32,7 +32,7 @@ public class ReviewService {
    * @param request レビュー投稿リクエストDTO
    */
   @Transactional
-  public void createReview(Long spotId, Long userId, ReviewCreateRequest request) {
+  public void createReview(Long spotId, Long userId, ReviewUpsertRequest request) {
     reviewMapper.insertReview(spotId, userId, request);
   }
 
