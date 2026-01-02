@@ -6,7 +6,9 @@ import com.famigo.backend.dto.SpotSearchCondition;
 import com.famigo.backend.mapper.SpotMapper;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor   // finalフィールドを引数に持つコンストラクタを自動生成
@@ -34,8 +36,15 @@ public class SpotService {
    * @return スポット詳細データ（SpotDetailDto）
    */
   public SpotDetailDto getSpotDetail(Long id, Long userId) {
-    return spotMapper.findDetailById(id, userId);
+
+    SpotDetailDto dto = spotMapper.findDetailById(id, userId);
     // MapperにID＋（ログイン時のみ）ユーザーIDを渡して詳細取得
+
+    if (dto == null) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Spot not found: id=" + id);
+    }
+
+    return dto;
   }
 
 }

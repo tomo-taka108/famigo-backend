@@ -36,14 +36,14 @@ public class AuthService {
     User user = userMapper.findActiveByEmail(request.getEmail());
 
     if (user == null) {
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "メールアドレスまたはパスワードが正しくありません");
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password.");
     }
 
     boolean ok = passwordEncoder.matches(request.getPassword(), user.getPasswordHash());
     // 入力パスワード（平文）とDBのパスワードハッシュを照合（ハッシュ化して比較）
 
     if (!ok) {
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "メールアドレスまたはパスワードが正しくありません");
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password.");
     }
 
     String token = jwtTokenProvider.generateToken(user.getId(), user.getEmail(), user.getRole());
@@ -77,7 +77,7 @@ public class AuthService {
     // userIdで「有効なユーザー」を取得
 
     if (user == null) {
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "ユーザーが見つかりません");
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authenticated user not found.");
     }
 
     return new MeResponse(user.getId(), user.getName(), user.getEmail(), user.getRole());
