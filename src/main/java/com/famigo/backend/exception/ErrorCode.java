@@ -6,9 +6,9 @@ package com.famigo.backend.exception;
  */
 public enum ErrorCode {
 
+  VALIDATION_ERROR,   // 400
   AUTH_REQUIRED,      // 401
   ACCESS_DENIED,      // 403
-  VALIDATION_ERROR,   // 400
   NOT_FOUND,          // 404
   INTERNAL_ERROR      // 500
 
