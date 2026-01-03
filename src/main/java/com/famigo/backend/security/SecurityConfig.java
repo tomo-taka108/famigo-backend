@@ -89,6 +89,8 @@ public class SecurityConfig {
             // --------------------------------------------
             .requestMatchers(HttpMethod.GET, "/favorites").hasAnyRole("USER", "ADMIN")
             .requestMatchers(HttpMethod.POST, "/spots/*/reviews").hasAnyRole("USER", "ADMIN")
+            .requestMatchers(HttpMethod.PUT, "/spots/*/reviews/*").hasAnyRole("USER", "ADMIN")
+            .requestMatchers(HttpMethod.DELETE, "/spots/*/reviews/*").hasAnyRole("USER", "ADMIN")
             .requestMatchers(HttpMethod.POST, "/spots/*/favorites").hasAnyRole("USER", "ADMIN")
             .requestMatchers(HttpMethod.DELETE, "/spots/*/favorites").hasAnyRole("USER", "ADMIN")
 
