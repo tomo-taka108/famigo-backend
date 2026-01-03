@@ -17,7 +17,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 
-public class ReviewCreateRequest {
+public class ReviewUpsertRequest {
 
   @Schema(description = "子どもの年齢帯（単一選択）", example = "PRESCHOOL")
   @NotNull
