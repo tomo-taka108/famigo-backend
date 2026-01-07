@@ -72,6 +72,7 @@ public class SecurityConfig {
             //   /auth/me はログイン必須（USER/ADMIN）
             // --------------------------------------------
             .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+            .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
 
             // --------------------------------------------
             // GUEST（未ログイン）で許可するAPI（仕様固定）
