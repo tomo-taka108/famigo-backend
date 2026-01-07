@@ -41,10 +41,10 @@ public class RegisterRequest {
   @NotBlank(message = "パスワード確認を入力してください")
   private String passwordConfirm;
 
-  @AssertTrue(message = "パスワードが一致しません")
+  @AssertTrue(message = "パスワードが一致しません") // メソッドがtrueを返すことを要求するアノテーション（falseの場合はエラーメッセージを表示）
   public boolean isPasswordMatched() {
     if (password == null || passwordConfirm == null) {
-      return true; // 未入力は NotBlank 側でエラーにする
+      return true; // 未入力エラーは NotBlank に任せたいからここではtrueを返す（責務の分離）
     }
     return password.equals(passwordConfirm);
   }
