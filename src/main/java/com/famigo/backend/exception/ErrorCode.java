@@ -10,6 +10,7 @@ public enum ErrorCode {
   AUTH_REQUIRED,      // 401
   ACCESS_DENIED,      // 403
   NOT_FOUND,          // 404
+  CONFLICT,           // 409
   INTERNAL_ERROR      // 500
 
 }
