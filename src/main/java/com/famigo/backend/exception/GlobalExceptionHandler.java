@@ -1,10 +1,13 @@
 package com.famigo.backend.exception;
 
+import com.famigo.backend.exception.ErrorResponse.FieldErrorItem;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -21,6 +24,7 @@ public class GlobalExceptionHandler {
 
   /**
    * バリデーションエラー（@Valid の body）を 400 で返す。
+   * ※UIで項目ごとに表示できるよう、fieldErrors を返す。
    *
    * @param ex MethodArgumentNotValidException(Spring MVCが標準装備している「@Valid付きの引数が不正だった」専用の例外クラス）
    * @return ErrorResponse（VALIDATION_ERROR）
@@ -28,18 +32,23 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
 
-    String detail = ex.getBindingResult()
+    List<ErrorResponse.FieldErrorItem> fieldErrors = ex.getBindingResult()
         .getFieldErrors()
         .stream()
-        .map(err -> err.getField() + ": " + err.getDefaultMessage())
-        .collect(Collectors.joining("; "));
+        .map(this::toFieldErrorItem)
+        .collect(Collectors.toList());
 
     ErrorResponse body = new ErrorResponse(
         ErrorCode.VALIDATION_ERROR.name(),
-        "Validation failed: " + detail
+        "Validation failed.",
+        fieldErrors
     );
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+  }
+
+  private ErrorResponse.FieldErrorItem toFieldErrorItem(FieldError err) {
+    return new ErrorResponse.FieldErrorItem(err.getField(), err.getDefaultMessage());
   }
 
 
