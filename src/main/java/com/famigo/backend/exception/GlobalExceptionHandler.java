@@ -1,6 +1,5 @@
 package com.famigo.backend.exception;
 
-import com.famigo.backend.exception.ErrorResponse.FieldErrorItem;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.util.List;
@@ -137,6 +136,10 @@ public class GlobalExceptionHandler {
 
     if (status == HttpStatus.NOT_FOUND) {
       return ErrorCode.NOT_FOUND;    // 404
+    }
+
+    if (status == HttpStatus.CONFLICT) {
+      return ErrorCode.CONFLICT;    // 409
     }
 
     return ErrorCode.INTERNAL_ERROR;    // 500
