@@ -1,6 +1,7 @@
 package com.famigo.backend.exception;
 
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.List;
 import lombok.Getter;
 
 /**
@@ -8,11 +9,38 @@ import lombok.Getter;
  * message は開発者向け。
  */
 @Getter
-@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorResponse {
 
-  private String errorCode;
+  private final String errorCode;
 
-  private String message;
+  private final String message;
+
+  private final List<FieldErrorItem> fieldErrors;
+
+  public ErrorResponse(String errorCode, String message) {
+    this.errorCode = errorCode;
+    this.message = message;
+    this.fieldErrors = null;
+  }
+
+  public ErrorResponse(String errorCode, String message, List<FieldErrorItem> fieldErrors) {
+    this.errorCode = errorCode;
+    this.message = message;
+    this.fieldErrors = fieldErrors;
+  }
+
+  @Getter
+  public static class FieldErrorItem {
+
+    private final String field;
+
+    private final String message;
+
+    public FieldErrorItem(String field, String message) {
+      this.field = field;
+      this.message = message;
+    }
+  }
 
 }
