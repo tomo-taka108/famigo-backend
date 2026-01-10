@@ -7,7 +7,7 @@
 
   <!--
     スポットIDに紐づくレビュー一覧取得
-    ユーザーが退会 / 削除されている場合は「退会済みユーザー」と表示
+    ユーザーが退会 / 削除されている場合は「退会ユーザー」と表示
   -->
   <select id="selectReviewsBySpotId" resultType="com.famigo.backend.dto.ReviewListItemDto">
     SELECT
@@ -17,12 +17,12 @@
 
       CASE
       WHEN u.id IS NULL
-      THEN '退会済みユーザー'
+      THEN '退会ユーザー'
 
       WHEN u.is_deleted = 1
-      THEN '退会済みユーザー'
+      THEN '退会ユーザー'
 
-      ELSE COALESCE(u.name, '退会済みユーザー')
+      ELSE COALESCE(u.name, '退会ユーザー')
       END           AS userName,
 
       r.child_age_group AS childAgeGroup,

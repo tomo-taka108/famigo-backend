@@ -1,5 +1,7 @@
 package com.famigo.backend.security;
 
+import com.famigo.backend.entity.User;
+import com.famigo.backend.mapper.UserMapper;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -15,24 +17,19 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * Authorization（認可） ヘッダの Bearer JWT を読み取り、SecurityContext に Authentication（認証） をセットするフィルタ。
- * このフィルタがセットした principal は {@link AppUserPrincipal} であり、Controller/Service から userId を取り出す土台になる。
+ * Authorization（認可）ヘッダの Bearer JWT を読み取り、SecurityContext に Authentication をセットするフィルタ。
+ * - JWTが有効でも、ユーザーが退会（論理削除）済みなら未ログイン扱いにする（DBで active user を確認）
  */
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-  // JWTの解析・検証を行う共通部品
   private final JwtTokenProvider jwtTokenProvider;
+  private final UserMapper userMapper;
 
-  public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
+  public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider, UserMapper userMapper) {
     this.jwtTokenProvider = jwtTokenProvider;
+    this.userMapper = userMapper;
   }
 
-
-  /**
-   * 1リクエストにつき1回実行されるフィルタ本体。
-   * Bearerトークンがあり、検証成功した場合のみ認証済み扱いにする。
-   * 失敗した場合は SecurityContext を空にして後続へ渡す（=未ログイン扱い）。
-   */
   @Override
   protected void doFilterInternal(
       HttpServletRequest request,
@@ -50,13 +47,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         Claims claims = jwtTokenProvider.parseClaims(token);
 
         Long userId = ((Number) claims.get("uid")).longValue();
-        String email = claims.getSubject();
-        String role = (String) claims.get("role");
+
+        // 退会済みユーザーは弾く（JWTが有効でも、DB上でactiveでなければ未ログイン扱い）
+        User user = userMapper.findActiveById(userId);
+        if (user == null) {
+          SecurityContextHolder.clearContext();
+          filterChain.doFilter(request, response);
+          return;
+        }
+
+        String role = user.getRole();
 
         List<SimpleGrantedAuthority> authorities =
             List.of(new SimpleGrantedAuthority("ROLE_" + role));
 
-        AppUserPrincipal principal = new AppUserPrincipal(userId, email, role, authorities);
+        // email/role はDBから復元（メール変更後も principal の中身が最新になる）
+        AppUserPrincipal principal =
+            new AppUserPrincipal(user.getId(), user.getEmail(), role, authorities);
 
         UsernamePasswordAuthenticationToken authentication =
             new UsernamePasswordAuthenticationToken(principal, null, authorities);

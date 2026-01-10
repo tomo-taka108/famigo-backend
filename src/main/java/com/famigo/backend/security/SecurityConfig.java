@@ -1,5 +1,6 @@
 package com.famigo.backend.security;
 
+import com.famigo.backend.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,22 +15,20 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
- * Spring Security の全体設定（セキュリティのルールを定義する設定クラス） ポイント： セッションを使わない（ステートレス） JWTフィルタをログイン処理の前に挿入 未認証=401
- * / 権限不足=403 をJSONで統一 認可境界（GUEST / USER / ADMIN）をここで仕様として固定する
+ * Spring Security の設定クラス。
+ * JWT認証を前提とした「ステートレス（セッションなし）」構成にする。
  */
 @Configuration
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-  // JWT操作
   private final JwtTokenProvider jwtTokenProvider;
 
-  // 未認証時 401 を返す
   private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
-
-  // 権限不足時 403 を返す
   private final RestAccessDeniedHandler restAccessDeniedHandler;
+
+  private final UserMapper userMapper;
 
 
   /**
@@ -42,7 +41,7 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-    JwtAuthenticationFilter jwtFilter = new JwtAuthenticationFilter(jwtTokenProvider);
+    JwtAuthenticationFilter jwtFilter = new JwtAuthenticationFilter(jwtTokenProvider, userMapper);
 
     http
         .csrf(csrf -> csrf.disable())
@@ -68,8 +67,6 @@ public class SecurityConfig {
 
             // --------------------------------------------
             // 認証系
-            //   login は公開（permitAll）
-            //   /auth/me はログイン必須（USER/ADMIN）
             // --------------------------------------------
             .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
             .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
@@ -88,12 +85,19 @@ public class SecurityConfig {
             // USER（ログイン）で許可するAPI（仕様固定）
             //   ADMIN も USER を包含するため hasAnyRole(USER, ADMIN)
             // --------------------------------------------
+            .requestMatchers(HttpMethod.GET, "/auth/me").hasAnyRole("USER", "ADMIN")
             .requestMatchers(HttpMethod.GET, "/favorites").hasAnyRole("USER", "ADMIN")
             .requestMatchers(HttpMethod.POST, "/spots/*/reviews").hasAnyRole("USER", "ADMIN")
             .requestMatchers(HttpMethod.PUT, "/spots/*/reviews/*").hasAnyRole("USER", "ADMIN")
             .requestMatchers(HttpMethod.DELETE, "/spots/*/reviews/*").hasAnyRole("USER", "ADMIN")
             .requestMatchers(HttpMethod.POST, "/spots/*/favorites").hasAnyRole("USER", "ADMIN")
             .requestMatchers(HttpMethod.DELETE, "/spots/*/favorites").hasAnyRole("USER", "ADMIN")
+
+            // ユーザー自己管理
+            .requestMatchers(HttpMethod.PUT, "/users/me/display-name").hasAnyRole("USER", "ADMIN")
+            .requestMatchers(HttpMethod.PUT, "/users/me/email").hasAnyRole("USER", "ADMIN")
+            .requestMatchers(HttpMethod.PUT, "/users/me/password").hasAnyRole("USER", "ADMIN")
+            .requestMatchers(HttpMethod.DELETE, "/users/me").hasAnyRole("USER", "ADMIN")
 
             // --------------------------------------------
             // ADMIN（将来の管理系API用）
