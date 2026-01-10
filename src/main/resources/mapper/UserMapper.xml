@@ -64,4 +64,28 @@
     LIMIT 1
   </select>
 
+  <!-- =========================================================
+       ユーザー新規作成（サインアップ）
+       ========================================================= -->
+  <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+    INSERT INTO users (
+      name,
+      email,
+      password_hash,
+      role,
+      created_at,
+      updated_at,
+      is_deleted
+    )
+    VALUES (
+      #{name},
+      #{email},
+      #{passwordHash},
+      #{role},
+      NOW(),
+      NOW(),
+      0
+    )
+  </insert>
+
 </mapper>
