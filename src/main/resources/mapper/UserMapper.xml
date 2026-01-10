@@ -88,4 +88,66 @@
     )
   </insert>
 
+  <!-- =========================================================
+       ユーザー情報更新
+       ①表示名更新（users.name）
+       ========================================================= -->
+  <update id="updateName">
+    UPDATE
+      users
+    SET
+      name = #{name},
+      updated_at = NOW()
+    WHERE
+      id = #{id}
+      AND is_deleted = 0
+  </update>
+
+  <!-- =========================================================
+       ユーザー情報更新
+       ②メールアドレス更新（users.email）
+       ========================================================= -->
+  <update id="updateEmail">
+    UPDATE
+      users
+    SET
+      email = #{email},
+      updated_at = NOW()
+    WHERE
+      id = #{id}
+      AND is_deleted = 0
+  </update>
+
+  <!-- =========================================================
+       ユーザー情報更新
+       ③パスワード更新（users.password_hash）
+       ========================================================= -->
+  <update id="updatePasswordHash">
+    UPDATE
+      users
+    SET
+      password_hash = #{passwordHash},
+      updated_at = NOW()
+    WHERE
+      id = #{id}
+      AND is_deleted = 0
+  </update>
+
+  <!-- =========================================================
+       退会（論理削除）
+       - is_deleted を 1 にする
+       - 表示名を「退会ユーザー」に更新する
+       ========================================================= -->
+  <update id="withdraw">
+    UPDATE
+      users
+    SET
+      is_deleted = 1,
+      name = #{withdrawnName},
+      updated_at = NOW()
+    WHERE
+      id = #{id}
+      AND is_deleted = 0
+  </update>
+
 </mapper>
