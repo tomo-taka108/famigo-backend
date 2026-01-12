@@ -56,6 +56,20 @@ public interface UserMapper {
 
 
   /**
+   * プロフィール情報を更新する（表示名 + メールアドレスを同時更新）（論理削除ユーザーは対象外）
+   * 【用途】
+   * - アカウント設定画面の「更新」ボタン
+   * - 方針（原子性）：入力エラーがあれば、どの項目も更新しない
+   *
+   * @param id ユーザーID
+   * @param name 新しい表示名
+   * @param email 新しいメールアドレス
+   * @return 影響行数（成功:1）
+   */
+  int updateProfile(@Param("id") Long id, @Param("name") String name, @Param("email") String email);
+
+
+  /**
    * パスワードハッシュ（users.password_hash）を更新する（論理削除ユーザーは対象外）
    *
    * @param id ユーザーID

@@ -31,8 +31,8 @@ import lombok.Setter;
 public class RegisterRequest {
 
   @Schema(description = "表示名（ニックネーム可）", example = "ゆうパパ")
-  @NotBlank(message = "表示名を入力してください", groups = First.class)
-  @Size(min = 3, max = 100, message = "表示名は3文字以上で入力してください", groups = Second.class)
+  @NotBlank(message = "表示名（ユーザー名）を入力してください", groups = First.class)
+  @Size(min = 3, max = 100, message = "表示名（ユーザー名）は3文字以上で入力してください", groups = Second.class)
   private String displayName;
 
   @Schema(description = "メールアドレス（ログインID）", example = "test@example.com")

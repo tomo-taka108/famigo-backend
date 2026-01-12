@@ -24,6 +24,36 @@ public class UserSelfService {
   private final UserMapper userMapper;
   private final PasswordEncoder passwordEncoder;
 
+  /**
+   * プロフィール（表示名 + メールアドレス）をまとめて更新する。
+   * 【用途】
+   * - アカウント設定画面の「更新」ボタン
+   * 【方針（原子性）】
+   * - バリデーションNGの場合、Controller層で 400 を返し、Service層は呼ばれない
+   * - DB制約（email UNIQUE）などで失敗した場合も、トランザクションにより更新は確定しない
+   *
+   * @param userId  ログイン中ユーザーID
+   * @param request 更新内容（displayName/email）
+   * @return 更新後のログイン中ユーザー情報
+   */
+  @Transactional
+  public MeResponse updateProfile(Long userId, UpdateUserMeRequest request) {
+
+    requireActiveUser(userId);
+
+    try {
+      int rows = userMapper.updateProfile(userId, request.getDisplayName(), request.getEmail());
+      if (rows != 1) {
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authenticated user not found.");
+      }
+    } catch (DuplicateKeyException e) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "Email is already registered.");
+    }
+
+    User updated = requireActiveUser(userId);
+    return new MeResponse(updated.getId(), updated.getName(), updated.getEmail(), updated.getRole());
+  }
+
 
   /**
    * 表示名を更新する。

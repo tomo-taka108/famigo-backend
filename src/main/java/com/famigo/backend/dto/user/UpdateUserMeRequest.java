@@ -27,6 +27,18 @@ import lombok.Setter;
 public class UpdateUserMeRequest {
 
   // =========================================================
+  // アカウント設定（プロフィール更新：表示名 + メール）用：グループ
+  // ※「更新ボタン1回」で表示名/メールをまとめて更新する用途。
+  // ※バリデーションNGなら、どの項目も更新しない（原子性）。
+  // =========================================================
+  public interface ProfileFirst extends First {}
+  public interface ProfileSecond extends Second {}
+
+  @GroupSequence({ProfileFirst.class, ProfileSecond.class})
+  public interface ProfileUpdate {}
+
+
+  // =========================================================
   // 表示名変更用：グループ（First/Secondを継承して「表示名専用」にする）
   // =========================================================
   public interface DisplayNameFirst extends First {}
@@ -60,8 +72,8 @@ public class UpdateUserMeRequest {
   // 表示名（display-name）
   // =========================================================
   @Schema(description = "新しい表示名（ニックネーム可）", example = "ゆうパパ")
-  @NotBlank(message = "表示名を入力してください", groups = DisplayNameFirst.class)
-  @Size(min = 3, max = 100, message = "表示名は3文字以上で入力してください", groups = DisplayNameSecond.class)
+  @NotBlank(message = "表示名（ユーザー名）を入力してください", groups = {DisplayNameFirst.class, ProfileFirst.class})
+  @Size(min = 3, max = 100, message = "表示名（ユーザー名）は3文字以上で入力してください", groups = {DisplayNameSecond.class, ProfileSecond.class})
   private String displayName;
 
 
@@ -69,9 +81,9 @@ public class UpdateUserMeRequest {
   // メール（email）
   // =========================================================
   @Schema(description = "新しいメールアドレス（ログインID）", example = "newmail@example.com")
-  @NotBlank(message = "メールアドレスを入力してください", groups = EmailFirst.class)
-  @Email(message = "有効なメールアドレスを入力してください", groups = EmailSecond.class)
-  @Size(max = 255, message = "メールアドレスは255文字以内で入力してください", groups = EmailSecond.class)
+  @NotBlank(message = "メールアドレスを入力してください", groups = {EmailFirst.class, ProfileFirst.class})
+  @Email(message = "有効なメールアドレスを入力してください", groups = {EmailSecond.class, ProfileSecond.class})
+  @Size(max = 255, message = "メールアドレスは255文字以内で入力してください", groups = {EmailSecond.class, ProfileSecond.class})
   private String email;
 
 
