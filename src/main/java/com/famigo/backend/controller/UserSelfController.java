@@ -32,6 +32,43 @@ public class UserSelfController {
 
   private final UserSelfService userSelfService;
 
+  /**
+   * 自分のプロフィール（表示名 + メールアドレス）をまとめて変更するエンドポイント。
+   * 【背景】
+   * - アカウント設定画面の「更新」ボタンが、表示名更新 → メール更新 を別リクエストで投げると
+   *   「メールが不正でエラー表示なのに表示名だけ更新された」という“部分更新”が起きうる。
+   * 【方針（原子性）】
+   * - バリデーションエラーがあれば 400 を返し、DBは一切更新しない
+   * - DB制約（email UNIQUE）等で失敗しても、DBは更新しない
+   *
+   * @param request   変更内容（displayName/email）
+   * @param principal ログイン中ユーザー情報（JWTから復元）
+   * @return 更新後のログイン中ユーザー情報
+   */
+  @Operation(
+      summary = "自分のプロフィールを変更（Update）（表示名+メール）",
+      description = "ログイン中ユーザーの表示名（users.name）とメールアドレス（users.email）を同時に更新します。"
+          + " 方針（原子性）：入力エラーがある場合は、どの項目も更新しません。",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "更新成功",
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = MeResponse.class)
+              )
+          )
+      }
+  )
+  @PutMapping("/profile")
+  public MeResponse updateProfile(
+      @Validated(UpdateUserMeRequest.ProfileUpdate.class)
+      @RequestBody UpdateUserMeRequest request,
+      @AuthenticationPrincipal AppUserPrincipal principal
+  ) {
+    return userSelfService.updateProfile(principal.getUserId(), request);
+  }
+
 
   /**
    * 自分の表示名を変更するエンドポイント。
