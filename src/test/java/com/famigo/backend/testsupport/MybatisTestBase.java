@@ -28,6 +28,10 @@ public abstract class MybatisTestBase {
           .withUsername("test")
           .withPassword("test");
 
+  /**
+   * Springのプロパティに「起動したコンテナの接続情報」を注入する。
+   * ここをやることで application-test.properties にDB接続を書かなくて良い。
+   */
   @DynamicPropertySource // テスト起動時にSpringのプロパティを動的に差し替える（＝コンテナの接続先を注入）
   static void registerProps(DynamicPropertyRegistry registry) {
 
