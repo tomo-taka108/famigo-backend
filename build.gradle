@@ -78,4 +78,5 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+	maxParallelForks = 1 // テストを並列プロセスで走らせない（Testcontainers + Springの安定化）
 }
