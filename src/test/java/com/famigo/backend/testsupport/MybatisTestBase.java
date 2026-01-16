@@ -15,18 +15,24 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * - Testcontainers(MySQL)で実DBを起動
  * - Flywayを有効化して migration/seed を流す
  */
-@Testcontainers // JUnit5 + Testcontainers 連携を有効化。
 @ActiveProfiles("test") // Spring Boot の profile を test に切り替える。application-test.properties があればそれが優先される。
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE) // H2等に置き換えず、TestcontainersのDBを使う
 @ImportAutoConfiguration(FlywayAutoConfiguration.class) // テストでもFlywayを有効化（migrationを流す）
 public abstract class MybatisTestBase {
 
-  @Container // JUnitがこのコンテナを起動・停止する対象として扱う
   private static final MySQLContainer<?> MYSQL =
       new MySQLContainer<>("mysql:8.0.42")
           .withDatabaseName("famigo_test")
           .withUsername("test")
           .withPassword("test");
+
+  /**
+   * クラスロード時に1回だけコンテナを起動する
+   *（テストを何クラスまとめ実行しても、同一コンテナを使い回す）
+   */
+  static {
+    MYSQL.start();
+  }
 
   /**
    * Springのプロパティに「起動したコンテナの接続情報」を注入する。
