@@ -56,7 +56,7 @@ public class AppUserPrincipal implements UserDetails {
     return true;
   }
 
-  /** @return 常に true（アカウントロックはフェーズ6で実装予定） */
+  /** @return 常に true（アカウントロックは現状未実装） */
   @Override
   public boolean isAccountNonLocked() {
     return true;

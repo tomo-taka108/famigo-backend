@@ -44,8 +44,7 @@ public class CategoryController {
                   )
               )
           )
-          // 将来的に 400 / 404 / 500 などをハンドリングする場合は、
-          // ここに ApiResponse を追加していく想定
+          // 将来的に 400 / 404 / 500 などをハンドリングする場合は、ここに ApiResponse を追加していく想定
       }
   )
 
