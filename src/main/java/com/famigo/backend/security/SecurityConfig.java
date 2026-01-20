@@ -57,6 +57,16 @@ public class SecurityConfig {
         .authorizeHttpRequests(auth -> auth
 
             // --------------------------------------------
+            // CORS の Preflight（ブラウザの OPTIONS リクエスト）
+            // --------------------------------------------
+            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+            // --------------------------------------------
+            // 死活監視（ALB などのヘルスチェック用）
+            // --------------------------------------------
+            .requestMatchers(HttpMethod.GET, "/health").permitAll()
+
+            // --------------------------------------------
             // Swagger（開発用）
             // --------------------------------------------
             .requestMatchers(
