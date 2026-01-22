@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,20 +25,15 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  */
 @RestController
 @RequestMapping("/users/me")
-@CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
 public class UserSelfController {
 
   private final UserSelfService userSelfService;
 
   /**
-   * 自分のプロフィール（表示名 + メールアドレス）をまとめて変更するエンドポイント。
-   * 【背景】
-   * - アカウント設定画面の「更新」ボタンが、表示名更新 → メール更新 を別リクエストで投げると
-   *   「メールが不正でエラー表示なのに表示名だけ更新された」という“部分更新”が起きうる。
-   * 【方針（原子性）】
-   * - バリデーションエラーがあれば 400 を返し、DBは一切更新しない
-   * - DB制約（email UNIQUE）等で失敗しても、DBは更新しない
+   * 自分のプロフィール（表示名 + メールアドレス）をまとめて変更するエンドポイント。 【背景】 - アカウント設定画面の「更新」ボタンが、表示名更新 → メール更新 を別リクエストで投げると
+   * 「メールが不正でエラー表示なのに表示名だけ更新された」という“部分更新”が起きうる。 【方針（原子性）】 - バリデーションエラーがあれば 400 を返し、DBは一切更新しない -
+   * DB制約（email UNIQUE）等で失敗しても、DBは更新しない
    *
    * @param request   変更内容（displayName/email）
    * @param principal ログイン中ユーザー情報（JWTから復元）

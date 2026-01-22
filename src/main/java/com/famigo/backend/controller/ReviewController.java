@@ -13,7 +13,6 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,7 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/spots")   // このコントローラーで扱うURLの共通プレフィックスを設定
-@CrossOrigin(origins = "http://localhost:5173")    // Viteのフロントからのアクセスを許可
 @RequiredArgsConstructor    // finalフィールドを引数に持つコンストラクタを自動生成
 public class ReviewController {
 
@@ -67,8 +65,8 @@ public class ReviewController {
   /**
    * 指定したスポットIDのスポットにレビューを新規投稿するエンドポイント。
    *
-   * @param spotId  投稿対象のスポットID
-   * @param request レビュー投稿リクエストDTO（バリデーション対象）
+   * @param spotId    投稿対象のスポットID
+   * @param request   レビュー投稿リクエストDTO（バリデーション対象）
    * @param principal ログイン中ユーザー情報（JWTから復元）
    */
   @Operation(
@@ -96,9 +94,9 @@ public class ReviewController {
   /**
    * 指定したスポットID配下のレビューを編集するエンドポイント。
    *
-   * @param spotId スポットID
-   * @param reviewId レビューID
-   * @param request レビュー編集リクエストDTO
+   * @param spotId    スポットID
+   * @param reviewId  レビューID
+   * @param request   レビュー編集リクエストDTO
    * @param principal ログインユーザー情報（JWTから復元）
    */
   @Operation(
@@ -132,8 +130,8 @@ public class ReviewController {
   /**
    * 指定したスポットID配下のレビューを削除（論理削除）するエンドポイント。
    *
-   * @param spotId スポットID
-   * @param reviewId レビューID
+   * @param spotId    スポットID
+   * @param reviewId  レビューID
    * @param principal ログインユーザー情報（JWTから復元）
    */
   @Operation(

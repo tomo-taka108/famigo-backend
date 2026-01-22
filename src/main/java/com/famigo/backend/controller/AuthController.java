@@ -14,7 +14,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.CrossOrigin;   // ★ CORS許可用アノテーションをインポート
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,7 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/auth")   // このコントローラーで扱うURLの共通プレフィックスを設定
-@CrossOrigin(origins = "http://localhost:5173")    // Viteのフロントからのアクセスを許可
 @RequiredArgsConstructor    // finalフィールドを引数に持つコンストラクタを自動生成
 public class AuthController {
 
