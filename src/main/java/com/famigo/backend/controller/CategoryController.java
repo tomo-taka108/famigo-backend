@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/categories")   // このコントローラーで扱うURLの共通プレフィックスを設定
-@CrossOrigin(origins = "http://localhost:5173")    // Viteのフロントからのアクセスを許可
 @RequiredArgsConstructor    // finalフィールドを引数に持つコンストラクタを自動生成
 public class CategoryController {
 
