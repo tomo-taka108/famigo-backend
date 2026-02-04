@@ -12,10 +12,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 /**
  * CORS（Cross-Origin Resource Sharing）のグローバル設定。
- * ローカル開発では http://localhost:5173（Vite）からのアクセスを許可し、
- * 本番では https://famigo.jp などの正規ドメインのみ許可する。
- * Controllerごとの @CrossOrigin は「本番のドメイン差し替え漏れ」事故を起こしやすいため、
- * このクラスで一元管理する方針とする。
+ * Controllerごとの @CrossOrigin は「本番のドメイン差し替え漏れ」事故を起こしやすいため、このクラスで一元管理する方針とする。
+ * 許可Originは application-*.properties（または本番の環境変数）で管理する。
+ * 例：
+ *   ローカル：http://localhost:5173, http://localhost:4173（vite preview）
+ *   本番：https://famigo-odekake.com, https://www.famigo-odekake.com
  */
 @Configuration
 public class CorsConfig {
@@ -23,8 +24,8 @@ public class CorsConfig {
   /**
    * 許可するOrigin（カンマ区切り）。
    * 例：
-   *   ローカル：http://localhost:5173
-   *   本番：https://famigo.jp
+   *   ローカル：http://localhost:5173,http://localhost:4173
+   *   本番：https://famigo-odekake.com,https://www.famigo-odekake.com
    */
   @Value("${famigo.cors.allowed-origins}")
   private String allowedOrigins;
