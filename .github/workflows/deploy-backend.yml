@@ -53,6 +53,7 @@ jobs:
       - name: Deploy on EC2 via SSM (tag target)
         run: |
           set -e
+
           CMD_ID=$(aws ssm send-command \
             --document-name "AWS-RunShellScript" \
             --comment "Deploy Famigo backend (docker rebuild)" \
@@ -70,15 +71,6 @@ jobs:
             ]' \
             --query "Command.CommandId" --output text \
             --region "${AWS_REGION}")
+
           echo "SSM CommandId=${CMD_ID}"
-
-          # 実行結果を待つ（失敗時のログ確認に便利）
-          aws ssm wait command-executed \
-            --command-id "${CMD_ID}" \
-            --targets "Key=tag:Role,Values=famigo-api" \
-            --region "${AWS_REGION}"
-
-          aws ssm list-command-invocations \
-            --command-id "${CMD_ID}" \
-            --details \
-            --region "${AWS_REGION}"
+          echo "SSM command was sent. Check result in AWS Systems Manager -> Run Command history."
