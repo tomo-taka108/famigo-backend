@@ -1,0 +1,84 @@
+name: Deploy Backend (S3 + SSM)
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ap-northeast-1
+  S3_BUCKET: famigo-odekake-backend-artifacts
+  S3_KEY: backend/app.jar
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Build app.jar
+        run: |
+          chmod +x ./gradlew
+          ./gradlew clean bootJar
+
+      - name: Prepare artifact (pick bootJar, not plain)
+        run: |
+          # bootJarは plain ではない方（-plain.jar を除外）
+          JAR_PATH="$(ls -1 build/libs/*.jar | grep -v -- '-plain\.jar$' | head -n 1)"
+          echo "JAR_PATH=$JAR_PATH"
+          cp "$JAR_PATH" app.jar
+          ls -lh app.jar
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_BACKEND_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Upload app.jar to S3
+        run: |
+          aws s3 cp ./app.jar "s3://${S3_BUCKET}/${S3_KEY}"
+
+      - name: Deploy on EC2 via SSM (tag target)
+        run: |
+          set -e
+          CMD_ID=$(aws ssm send-command \
+            --document-name "AWS-RunShellScript" \
+            --comment "Deploy Famigo backend (docker rebuild)" \
+            --targets "Key=tag:Role,Values=famigo-api" \
+            --parameters commands='[
+              "set -e",
+              "sudo mkdir -p /opt/famigo-docker",
+              "cd /opt/famigo-docker",
+              "aws s3 cp s3://'${S3_BUCKET}'/'${S3_KEY}' ./app.jar.tmp",
+              "sudo mv ./app.jar.tmp ./app.jar",
+              "sudo chown ec2-user:ec2-user ./app.jar",
+              "sudo docker build -t famigo-api:latest .",
+              "sudo docker compose up -d --pull never",
+              "curl -fsS http://localhost:8080/health"
+            ]' \
+            --query "Command.CommandId" --output text \
+            --region "${AWS_REGION}")
+          echo "SSM CommandId=${CMD_ID}"
+
+          # 実行結果を待つ（失敗時のログ確認に便利）
+          aws ssm wait command-executed \
+            --command-id "${CMD_ID}" \
+            --targets "Key=tag:Role,Values=famigo-api" \
+            --region "${AWS_REGION}"
+
+          aws ssm list-command-invocations \
+            --command-id "${CMD_ID}" \
+            --details \
+            --region "${AWS_REGION}"
