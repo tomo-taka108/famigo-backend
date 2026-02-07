@@ -4,6 +4,7 @@ import com.famigo.backend.dto.auth.MeResponse;
 import com.famigo.backend.dto.user.UpdateUserMeRequest;
 import com.famigo.backend.entity.User;
 import com.famigo.backend.mapper.UserMapper;
+import com.famigo.backend.security.DemoAccountGuard;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,7 @@ public class UserSelfService {
 
   private final UserMapper userMapper;
   private final PasswordEncoder passwordEncoder;
+  private final DemoAccountGuard demoAccountGuard;
 
   /**
    * プロフィール（表示名 + メールアドレス）をまとめて更新する。
@@ -39,7 +41,10 @@ public class UserSelfService {
   @Transactional
   public MeResponse updateProfile(Long userId, UpdateUserMeRequest request) {
 
-    requireActiveUser(userId);
+    User user = requireActiveUser(userId);
+
+    // デモアカウントは更新不可（バックエンドで強制）
+    demoAccountGuard.requireNotProtected(user.getEmail());
 
     try {
       int rows = userMapper.updateProfile(userId, request.getDisplayName(), request.getEmail());
@@ -65,7 +70,10 @@ public class UserSelfService {
   @Transactional
   public MeResponse updateDisplayName(Long userId, UpdateUserMeRequest request) {
 
-    requireActiveUser(userId);
+    User user = requireActiveUser(userId);
+
+    // デモアカウントは更新不可（バックエンドで強制）
+    demoAccountGuard.requireNotProtected(user.getEmail());
 
     int rows = userMapper.updateName(userId, request.getDisplayName());
     if (rows != 1) {
@@ -88,7 +96,10 @@ public class UserSelfService {
   @Transactional
   public MeResponse updateEmail(Long userId, UpdateUserMeRequest request) {
 
-    requireActiveUser(userId);
+    User user = requireActiveUser(userId);
+
+    // デモアカウントは更新不可（バックエンドで強制）
+    demoAccountGuard.requireNotProtected(user.getEmail());
 
     try {
       int rows = userMapper.updateEmail(userId, request.getEmail());
@@ -115,6 +126,9 @@ public class UserSelfService {
 
     User user = requireActiveUser(userId);
 
+    // デモアカウントは更新不可（バックエンドで強制）
+    demoAccountGuard.requireNotProtected(user.getEmail());
+
     boolean ok = passwordEncoder.matches(request.getCurrentPassword(), user.getPasswordHash());
     if (!ok) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid current password.");
@@ -140,7 +154,10 @@ public class UserSelfService {
   @Transactional
   public void withdraw(Long userId) {
 
-    requireActiveUser(userId);
+    User user = requireActiveUser(userId);
+
+    // デモアカウントは退会不可（バックエンドで強制）
+    demoAccountGuard.requireNotProtected(user.getEmail());
 
     int rows = userMapper.withdraw(userId, WITHDRAWN_NAME);
     if (rows != 1) {
