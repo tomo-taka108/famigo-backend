@@ -1,107 +1,88 @@
 # Famigo（ファミゴー）
 
-## サービス名
-**Famigo（ファミゴー）**
-
----
 
 ## サービス概要
-Famigoは、「なるべくお金をかけずに、子どもとたっぷり遊べる場所」を探しやすくするためのサービスです。  
-公園・アスレチック・水遊びなどのスポットを、**エリア / カテゴリ / 予算 / 対象年齢 / 設備（オムツ替え・ベビーカーOK等）**で絞り込み検索できます。
+Famigoは、「なるべくお金をかけずに、子どもとたっぷり遊べる場所」を探しやすくするためのサービスです。<br>
+公園・アスレチック・水遊び場などのスポットを、**エリア / カテゴリ / 予算 / 対象年齢 / 設備（オムツ替え有無・ベビーカーOK等）**で絞り込み検索できます。
 
 - 未ログインでも：スポット検索・詳細閲覧・レビュー閲覧OK
 - ログインすると：お気に入り、レビュー投稿/編集/削除、アカウント設定が使えます
 
----
 
 ## 制作背景
-私には２人の小学生の息子がおり、家族そろって楽しめる場所に出かけるのが大好きです。
-とは言ってもテーマパーク等のお金がかかる施設に毎週のように行けるわけでもなく、
-安くて楽しい良い場所はないか、WEB情報をよく探していました。
-ですが、情報はSNSや地図アプリ、ブログなどに散らばっていて、毎回探すのが地味に大変です。
-また、子どもと出かけるとなると、「どこ行こう？」より先に **“条件”** が決まってたりします。  
-（無料がいい、ベビーカーOKがいい、トイレが気になる、水遊びできる？など）
- 
-そこで **「家族連れの気になるポイントに寄せた検索」と「リアルな口コミ」** をまとめて見られる場所が欲しくて作りました。
+私は２人の小学生の息子がおり、家族そろって楽しめる場所に出かけるのが大好きです。<br>
+とは言ってもテーマパーク等のお金がかかる施設に頻繁に行けるわけでもなく、
+安くて楽しい良い場所はないか、WEB情報をよく探していました。<br>
+ただし、子どもと出かけるとなると、「楽しそう」だけではなかなか決められず **“条件”** が先に来ることが多いです。 <br>
+（オムツ替えはある？／ベビーカーいける？／トイレが気になる／水遊びできる？など）<br>
+SNSや地図アプリ、個人ブログなどで家族向けのリアルな情報で見つけるのは簡単ですが、欲しい情報が揃うまでに時間がかかると感じていました。
 
----
+そこで **「家族連れの気になるポイント」に寄せた検索と口コミ** をまとめて見られる場所が欲しくて作りました。
+
+サービス名の「famigo（ファミゴー）」は、Family（家族）とGo（出かける）を組み合わせた造語です。<br>
+語感を少しポップにし、家族向けらしい親しみやすさと「行ってみよう！」と前向きになれる雰囲気を意識しました。
+
+
+## デプロイURL
+
+https://famigo-odekake.com
+
+### 【ゲストユーザーアカウント情報】<br>
+　メールアドレス `demo_user@example.com` <br>
+　パスワード  `demo1234`
+
 
 ## 主な使用技術
-
-### フロントエンド
-- React 19 / TypeScript
-- Vite
-- React Router
-- Tailwind CSS（v4）
-- lucide-react（アイコン）
 
 ### バックエンド
 - Java 21
 - Spring Boot 3.5.7
-- Spring Security（JWT / ステートレス）
+- Spring Security（JWT）
 - MyBatis
-- Flyway（マイグレーション & seed）
-- MySQL
-- springdoc-openapi（Swagger UI）
+- Flyway（マイグレーション）
+
+### フロントエンド
+- React 19 / TypeScript
+- Vite
+- Tailwind CSS（v4）
 
 ### テスト
 - JUnit 5
-- Spring Boot Test / MockMvc
-- Testcontainers（MySQL）
-- MyBatis Spring Boot Starter Test
 
-### インフラ（※作成中：仮）
-- AWS（ALB / EC2 / RDS / Route53 / ACM）
-- フロント：S3 + CloudFront（想定）
+### インフラ・その他
+- AWS（Route53 / CloudFront / S3 / VPC / ALB / EC2 / RDS / ACM）
+- Docker（バックエンド）
+- MySQL
+- Git・GitHub
 
----
 
 ## 機能一覧
 
-### スポット
-- スポット一覧表示（検索条件指定OK）
-    - キーワード（スポット名/住所/エリア部分一致）
-    - カテゴリ（複数）
-    - 予算（FREE / UNDER_1000 / UNDER_2000 / OVER_2000）
-    - 対象年齢（ALL / PRESCHOOL / ELE_LOW / ELE_HIGH / JUNIOR_HIGH）
-    - 設備（diaper / stroller / playground / athletics / water / indoor）
-- スポット詳細表示（基本情報 + 設備情報 + 各種メモ）
+### 認証・ユーザー
+- ユーザー登録（登録後、自動ログイン）
+- ユーザー情報編集（表示名、メールアドレス、パスワードの変更）
+- ユーザー削除
+- ログイン
+- ログアウト
+
+### お出かけスポット
+- スポットの一覧表示
+- スポットの詳細表示
+- スポットの条件検索
 
 ### お気に入り（ログイン必須）
-- お気に入り登録/解除
-- お気に入り一覧表示
+- お気に入りの一覧表示
+- お気に入りの登録／解除
 
 ### レビュー（ログイン必須）
-- レビュー一覧表示（未ログインでも閲覧OK）
-- レビュー投稿
-- 自分のレビュー編集/削除
+- レビューの一覧表示（未ログインでも閲覧可）
+- レビューの投稿
+- 自分のレビュー編集／削除
 
-### 認証・ユーザー
-- 新規登録（登録後、自動ログイン）
-- ログイン / ログアウト
-- 自分の情報取得（/auth/me）
-- アカウント設定（ログイン必須）
-    - 表示名変更
-    - メール変更（※退会ユーザーのemailも含め、再利用は不可）
-    - パスワード変更
-    - 退会（論理削除：表示名は「退会ユーザー」に変更、レビューは残す）
-
----
-
-## デプロイURL
-※作成中のため仮です
-
-- フロント（仮）：`https://famigo.example.com`
-- API（仮）：`https://api.famigo.example.com`
-- Swagger（ローカル）：`http://localhost:8080/swagger-ui/index.html`
-    - 本番（prod）では Swagger UI / api-docs は無効化しています
-
----
 
 ## 操作画面
-※ここはあとで **動画/GIF** を貼る想定です
 
-- トップ（LP）
+- トップページ
     - `docs/demo/landing.gif`（予定）
 - スポット検索 → 一覧
     - `docs/demo/search.gif`（予定）
@@ -112,7 +93,6 @@ Famigoは、「なるべくお金をかけずに、子どもとたっぷり遊�
 - アカウント設定（プロフィール更新・パスワード変更・退会）
     - `docs/demo/account.gif`（予定）
 
----
 
 ## API仕様書
 - Swagger UI（ローカル開発用）
@@ -122,19 +102,18 @@ Famigoは、「なるべくお金をかけずに、子どもとたっぷり遊�
 
 ※本番（prod）では安全のため Swagger は無効化しています。
 
----
 
 ## APIのURL設計
 
 ### 認証
-| Method | Path | 説明 | 認可 |
-|---|---|---|---|
+| メソッド | エンドポイント | 説明 | 認可 |
+|------|---------|---|---|
 | POST | `/auth/register` | 新規登録（登録後にJWT発行） | GUEST |
 | POST | `/auth/login` | ログイン（JWT発行） | GUEST |
-| GET | `/auth/me` | 自分のユーザー情報取得 | USER/ADMIN |
+| GET  | `/auth/me` | 自分のユーザー情報取得 | USER/ADMIN |
 
 ### スポット
-| Method | Path | 説明 | 認可 |
+| メソッド | エンドポイント | 説明 | 認可 |
 |---|---|---|---|
 | GET | `/spots` | スポット一覧（検索条件指定可） | GUEST |
 | GET | `/spots/{id}` | スポット詳細 | GUEST |
@@ -143,19 +122,19 @@ Famigoは、「なるべくお金をかけずに、子どもとたっぷり遊�
 - `/spots?keyword=公園&categoryIds=1&price=FREE&age=PRESCHOOL&facilities=diaper&facilities=water`
 
 ### カテゴリ
-| Method | Path | 説明 | 認可 |
+| メソッド | エンドポイント | 説明 | 認可 |
 |---|---|---|---|
 | GET | `/categories` | カテゴリ一覧 | GUEST |
 
 ### 設備（スポット設備）
-| Method | Path | 説明 | 認可 |
+| メソッド | エンドポイント | 説明 | 認可 |
 |---|---|---|---|
 | GET | `/spot-facilities/{spotId}` | 設備情報取得 | （現状：ログイン必須扱い） |
 
 ※スポット詳細には設備情報を含めて返しているため、基本は詳細APIで足ります（用途に応じて整理予定）
 
 ### レビュー
-| Method | Path | 説明 | 認可 |
+| メソッド | エンドポイント | 説明 | 認可 |
 |---|---|---|---|
 | GET | `/spots/{spotId}/reviews` | レビュー一覧 | GUEST |
 | POST | `/spots/{spotId}/reviews` | レビュー投稿 | USER/ADMIN |
@@ -163,14 +142,14 @@ Famigoは、「なるべくお金をかけずに、子どもとたっぷり遊�
 | DELETE | `/spots/{spotId}/reviews/{reviewId}` | 自分のレビュー削除 | USER/ADMIN |
 
 ### お気に入り
-| Method | Path | 説明 | 認可 |
+| メソッド | エンドポイント | 説明 | 認可 |
 |---|---|---|---|
 | GET | `/favorites` | お気に入り一覧 | USER/ADMIN |
 | POST | `/spots/{spotId}/favorites` | お気に入り登録 | USER/ADMIN |
 | DELETE | `/spots/{spotId}/favorites` | お気に入り解除 | USER/ADMIN |
 
 ### ユーザー自己管理（/users/me）
-| Method | Path | 説明 | 認可 |
+| メソッド | エンドポイント | 説明 | 認可 |
 |---|---|---|---|
 | PUT | `/users/me/profile` | 表示名 + メールを同時更新（原子性重視） | USER/ADMIN |
 | PUT | `/users/me/display-name` | 表示名更新 | USER/ADMIN |
@@ -178,7 +157,6 @@ Famigoは、「なるべくお金をかけずに、子どもとたっぷり遊�
 | PUT | `/users/me/password` | パスワード変更（204） | USER/ADMIN |
 | DELETE | `/users/me` | 退会（論理削除）（204） | USER/ADMIN |
 
----
 
 ## ER図
 ※ここはあとで画像を貼る想定です（例：`docs/er.png`）
@@ -191,23 +169,18 @@ Famigoは、「なるべくお金をかけずに、子どもとたっぷり遊�
 - `reviews`（レビュー：spotsとusersに紐づく、論理削除あり）
 - `favorites`（お気に入り：users×spotsの中間、論理削除あり）
 
----
 
 ## 画面遷移図
 ※別で作成して貼り付け予定（例：`docs/ui-flow.png`）
 
----
 
 ## シーケンス図
 ※別で作成して貼り付け予定（例：`docs/sequence-review-post.png`）
 
----
 
 ## インフラ構成図
 ![インフラ構成図](docs/infra.png)
 
-
----
 
 ## 自動テスト
 
@@ -224,7 +197,6 @@ Famigoは、「なるべくお金をかけずに、子どもとたっぷり遊�
     - `SpotControllerTest` / `AuthControllerTest` / `ReviewControllerTest` など
     - ※コントローラのテストではフィルタを無効化して、リクエスト/レスポンス中心に確認
 
----
 
 ## 工夫した点・苦労した点
 
@@ -250,7 +222,6 @@ Famigoは、「なるべくお金をかけずに、子どもとたっぷり遊�
 - **テストはMySQL実DBで回す**
     - H2差異を避けたかったので、MapperはTestcontainers(MySQL)で検証しています
 
----
 
 ## 今後の展望
 - 管理者機能の拡充（スポット追加/編集、ユーザー管理 など）
@@ -259,15 +230,3 @@ Famigoは、「なるべくお金をかけずに、子どもとたっぷり遊�
 - CI/CD（GitHub Actions）でテスト〜デプロイを自動化
 - 退会後の扱い（メール再利用方針など）は、運用に合わせて再検討
 
----
-
-## デモアカウント（ローカル用 / seed）
-※DBをFlywayで作成すると投入されます
-
-- USER
-    - `test1@example.com` / `test1234`
-    - `test2@example.com` / `test2345`
-    - `demo_user@example.com` / `demo1234`
-- ADMIN
-    - `admin@example.com` / `admin1234`
-    - `demo_admin@example.com` / `admin1234`
