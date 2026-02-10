@@ -8,9 +8,8 @@ import org.springframework.stereotype.Component;
 
 /**
  * 本番環境（prod）での「設定漏れ」を起動時に検知して即座に落とすためのチェック。
- * 本番で JWT_SECRET 未設定のまま起動すると、
- * セキュリティ事故（弱いデフォルト鍵で運用）につながるため、
- * 起動そのものを失敗させる。
+ * 本番で JWT_SECRET 未設定のまま起動するとセキュリティ事故につながるため、起動そのものを失敗させる。
+ * また、CORS 設定漏れは「フロントからAPIが叩けない」典型事故になるため、こちらも同様に検知する。
  */
 @Component
 @Profile("prod")
@@ -19,8 +18,14 @@ public class ProductionStartupValidation implements ApplicationRunner {
   @Value("${famigo.jwt.secret:}")
   private String jwtSecret;
 
+  @Value("${famigo.cors.allowed-origins:}")
+  private String corsAllowedOrigins;
+
   @Override
   public void run(ApplicationArguments args) {
+    // ===============================
+    // JWT
+    // ===============================
     if (jwtSecret == null || jwtSecret.isBlank()) {
       throw new IllegalStateException("[prod] FAMIGO_JWT_SECRET が未設定です。安全のため起動を中断します。");
     }
@@ -35,6 +40,14 @@ public class ProductionStartupValidation implements ApplicationRunner {
     if (jwtSecret.length() < 32) {
       throw new IllegalStateException(
           "[prod] JWT_SECRET が短すぎます（32文字以上推奨）。安全のため起動を中断します。");
+    }
+
+    // ===============================
+    // CORS
+    // ===============================
+    if (corsAllowedOrigins == null || corsAllowedOrigins.isBlank()) {
+      throw new IllegalStateException(
+          "[prod] FAMIGO_CORS_ALLOWED_ORIGINS が未設定です。フロント公開のため必須です。起動を中断します。");
     }
   }
 }
