@@ -169,13 +169,13 @@ https://famigo-odekake.com
 ## ER図
 ※ここはあとで画像を貼る想定です（例：`docs/er.png`）
 
-### テーブル概要（実装済み）
-- `users`（ユーザー / 管理者、論理削除あり）
-- `categories`（カテゴリマスタ）
-- `spots`（スポット本体、カテゴリに紐づく、論理削除あり）
-- `spot_facilities`（スポット設備：spotsと1:1、論理削除あり）
-- `reviews`（レビュー：spotsとusersに紐づく、論理削除あり）
-- `favorites`（お気に入り：users×spotsの中間、論理削除あり）
+### テーブル概要
+- `users`（一般ユーザー／管理者アカウントを管理する）
+- `categories`（公園／動物園／室内遊び場などのカテゴリを定義する）
+- `spots`（お出かけスポットに関する主要情報を管理する）
+- `spot_facilities`（お出かけスポットの設備情報を管理する：spotsと1:1の関係）
+- `reviews`（ユーザーが投稿するレビュー情報を管理する：spotsとusersに紐づく）
+- `favorites`（ユーザーのお気に入りスポットを管理する：spotsとusersに紐づく）
 
 
 ## 画面遷移図
