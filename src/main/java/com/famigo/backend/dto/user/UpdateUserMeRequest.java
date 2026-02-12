@@ -14,9 +14,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * ユーザー自己情報更新用DTO（表示名変更 / メール変更 / パスワード変更）
+ * ユーザー自己情報更新用DTO（プロフィール更新 / パスワード変更）
  * 【ポイント】
- * - どの項目を必須にするかは Controller 側で @Validated(グループ) で切り替える
+ * - 必須項目は Controller 側で @Validated(グループ) で切り替える
  * - 「空欄なのにSizeも出る」などの二重エラーを避けるため、グループシーケンスを使う
  */
 @Schema(description = "ユーザー自己情報更新リクエスト（用途により必須項目が変わる）")
@@ -27,36 +27,13 @@ import lombok.Setter;
 public class UpdateUserMeRequest {
 
   // =========================================================
-  // アカウント設定（プロフィール更新：表示名 + メール）用：グループ
-  // ※「更新ボタン1回」で表示名/メールをまとめて更新する用途。
-  // ※バリデーションNGなら、どの項目も更新しない（原子性）。
+  // プロフィール更新（表示名 + メール）用：グループ
   // =========================================================
   public interface ProfileFirst extends First {}
   public interface ProfileSecond extends Second {}
 
   @GroupSequence({ProfileFirst.class, ProfileSecond.class})
   public interface ProfileUpdate {}
-
-
-  // =========================================================
-  // 表示名変更用：グループ（First/Secondを継承して「表示名専用」にする）
-  // =========================================================
-  public interface DisplayNameFirst extends First {}
-  public interface DisplayNameSecond extends Second {}
-
-  @GroupSequence({DisplayNameFirst.class, DisplayNameSecond.class})
-  public interface DisplayNameUpdate {}
-
-
-  // =========================================================
-  // メールアドレス変更用：グループ
-  // =========================================================
-  public interface EmailFirst extends First {}
-  public interface EmailSecond extends Second {}
-
-  @GroupSequence({EmailFirst.class, EmailSecond.class})
-  public interface EmailUpdate {}
-
 
   // =========================================================
   // パスワード変更用：グループ
@@ -67,25 +44,22 @@ public class UpdateUserMeRequest {
   @GroupSequence({PasswordFirst.class, PasswordSecond.class})
   public interface PasswordChange {}
 
-
   // =========================================================
-  // 表示名（display-name）
+  // 表示名（displayName）
   // =========================================================
   @Schema(description = "新しい表示名（ニックネーム可）", example = "ゆうパパ")
-  @NotBlank(message = "表示名（ユーザー名）を入力してください", groups = {DisplayNameFirst.class, ProfileFirst.class})
-  @Size(min = 3, max = 100, message = "表示名（ユーザー名）は3文字以上で入力してください", groups = {DisplayNameSecond.class, ProfileSecond.class})
+  @NotBlank(message = "表示名（ユーザー名）を入力してください", groups = ProfileFirst.class)
+  @Size(min = 3, max = 100, message = "表示名（ユーザー名）は3文字以上で入力してください", groups = ProfileSecond.class)
   private String displayName;
-
 
   // =========================================================
   // メール（email）
   // =========================================================
   @Schema(description = "新しいメールアドレス（ログインID）", example = "newmail@example.com")
-  @NotBlank(message = "メールアドレスを入力してください", groups = {EmailFirst.class, ProfileFirst.class})
-  @Email(message = "有効なメールアドレスを入力してください", groups = {EmailSecond.class, ProfileSecond.class})
-  @Size(max = 255, message = "メールアドレスは255文字以内で入力してください", groups = {EmailSecond.class, ProfileSecond.class})
+  @NotBlank(message = "メールアドレスを入力してください", groups = ProfileFirst.class)
+  @Email(message = "有効なメールアドレスを入力してください", groups = ProfileSecond.class)
+  @Size(max = 255, message = "メールアドレスは255文字以内で入力してください", groups = ProfileSecond.class)
   private String email;
-
 
   // =========================================================
   // パスワード（password）

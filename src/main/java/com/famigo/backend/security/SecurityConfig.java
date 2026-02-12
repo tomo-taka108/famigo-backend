@@ -30,7 +30,6 @@ public class SecurityConfig {
 
   private final UserMapper userMapper;
 
-
   /**
    * Securityのフィルタチェーンを構築する。
    *
@@ -103,9 +102,8 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.POST, "/spots/*/favorites").hasAnyRole("USER", "ADMIN")
             .requestMatchers(HttpMethod.DELETE, "/spots/*/favorites").hasAnyRole("USER", "ADMIN")
 
-            // ユーザー自己管理
-            .requestMatchers(HttpMethod.PUT, "/users/me/display-name").hasAnyRole("USER", "ADMIN")
-            .requestMatchers(HttpMethod.PUT, "/users/me/email").hasAnyRole("USER", "ADMIN")
+            // ユーザー自己管理（プロフィールは /profile に一本化）
+            .requestMatchers(HttpMethod.PUT, "/users/me/profile").hasAnyRole("USER", "ADMIN")
             .requestMatchers(HttpMethod.PUT, "/users/me/password").hasAnyRole("USER", "ADMIN")
             .requestMatchers(HttpMethod.DELETE, "/users/me").hasAnyRole("USER", "ADMIN")
 
@@ -123,7 +121,6 @@ public class SecurityConfig {
 
     return http.build();
   }
-
 
   /**
    * パスワードハッシュ化用。 ログイン（ID/Password）を実装する際に、DBには平文を保存せずハッシュ（BCrypt）を保存する前提。

@@ -36,26 +36,6 @@ public interface UserMapper {
 
 
   /**
-   * 表示名（users.name）を更新する（論理削除ユーザーは対象外）
-   *
-   * @param id ユーザーID
-   * @param name 新しい表示名
-   * @return 影響行数（成功:1）
-   */
-  int updateName(@Param("id") Long id, @Param("name") String name);
-
-
-  /**
-   * メールアドレス（users.email）を更新する（論理削除ユーザーは対象外）
-   *
-   * @param id ユーザーID
-   * @param email 新しいメールアドレス
-   * @return 影響行数（成功:1）
-   */
-  int updateEmail(@Param("id") Long id, @Param("email") String email);
-
-
-  /**
    * プロフィール情報を更新する（表示名 + メールアドレスを同時更新）（論理削除ユーザーは対象外）
    * 【用途】
    * - アカウント設定画面の「更新」ボタン
