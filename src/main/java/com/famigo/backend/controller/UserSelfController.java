@@ -69,69 +69,6 @@ public class UserSelfController {
 
 
   /**
-   * 自分の表示名を変更するエンドポイント。
-   *
-   * @param request   変更内容（displayName）
-   * @param principal ログイン中ユーザー情報（JWTから復元）
-   * @return 更新後のログイン中ユーザー情報
-   */
-  @Operation(
-      summary = "自分の表示名を変更（Update）",
-      description = "ログイン中ユーザーの表示名（users.name）を更新します。",
-      responses = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "更新成功",
-              content = @Content(
-                  mediaType = "application/json",
-                  schema = @Schema(implementation = MeResponse.class)
-              )
-          )
-      }
-  )
-  @PutMapping("/display-name")
-  public MeResponse updateDisplayName(
-      @Validated(UpdateUserMeRequest.DisplayNameUpdate.class)
-      @RequestBody UpdateUserMeRequest request,
-      @AuthenticationPrincipal AppUserPrincipal principal
-  ) {
-    return userSelfService.updateDisplayName(principal.getUserId(), request);
-  }
-
-
-  /**
-   * 自分のメールアドレスを変更するエンドポイント。
-   *
-   * @param request   変更内容（email）
-   * @param principal ログイン中ユーザー情報（JWTから復元）
-   * @return 更新後のログイン中ユーザー情報
-   */
-  @Operation(
-      summary = "自分のメールアドレスを変更（Update）",
-      description = "ログイン中ユーザーのメールアドレス（users.email）を更新します。"
-          + " email再利用は今回は対応しないため、退会ユーザーのemailも再利用不可です（DBのUNIQUE制約に従う）。",
-      responses = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "更新成功",
-              content = @Content(
-                  mediaType = "application/json",
-                  schema = @Schema(implementation = MeResponse.class)
-              )
-          )
-      }
-  )
-  @PutMapping("/email")
-  public MeResponse updateEmail(
-      @Validated(UpdateUserMeRequest.EmailUpdate.class)
-      @RequestBody UpdateUserMeRequest request,
-      @AuthenticationPrincipal AppUserPrincipal principal
-  ) {
-    return userSelfService.updateEmail(principal.getUserId(), request);
-  }
-
-
-  /**
    * 自分のパスワードを変更するエンドポイント。
    *
    * @param request   変更内容（currentPassword/newPassword/newPasswordConfirm）

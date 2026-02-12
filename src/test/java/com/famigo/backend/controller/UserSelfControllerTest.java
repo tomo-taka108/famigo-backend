@@ -2,7 +2,6 @@ package com.famigo.backend.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -74,24 +73,25 @@ class UserSelfControllerTest {
   }
 
   @Test
-  void メール変更_200で返ること() throws Exception {
-    MeResponse res = new MeResponse(1L, "name", "new@example.com", "USER");
-    when(userSelfService.updateEmail(eq(1L), any())).thenReturn(res);
+  void プロフィール更新_200で返ること() throws Exception {
+    MeResponse res = new MeResponse(1L, "new-name", "new@example.com", "USER");
+    when(userSelfService.updateProfile(eq(1L), any())).thenReturn(res);
 
     String json = """
-      { "email": "new@example.com" }
+      { "displayName": "new-name", "email": "new@example.com" }
       """;
 
-    mockMvc.perform(put("/users/me/email")
+    mockMvc.perform(put("/users/me/profile")
             .contentType(MediaType.APPLICATION_JSON)
             .characterEncoding("UTF-8")
             .content(json)
             .with(authentication(loginUser()))
-            .with(csrf())) // 更新系(PUT)はCSRFトークン無しだと403になりControllerに到達しないため、テストでは付与する
+            .with(csrf()))
         .andExpect(status().isOk())
+        .andExpect(jsonPath("$.displayName").value("new-name"))
         .andExpect(jsonPath("$.email").value("new@example.com"));
 
-    verify(userSelfService, times(1)).updateEmail(eq(1L), any());
+    verify(userSelfService, times(1)).updateProfile(eq(1L), any());
   }
 
   @Test
