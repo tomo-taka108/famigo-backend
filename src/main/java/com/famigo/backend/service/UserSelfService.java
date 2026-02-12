@@ -61,61 +61,6 @@ public class UserSelfService {
 
 
   /**
-   * 表示名を更新する。
-   *
-   * @param userId  ログイン中ユーザーID
-   * @param request 表示名変更（displayName）
-   * @return 更新後のログイン中ユーザー情報
-   */
-  @Transactional
-  public MeResponse updateDisplayName(Long userId, UpdateUserMeRequest request) {
-
-    User user = requireActiveUser(userId);
-
-    // デモアカウントは更新不可（バックエンドで強制）
-    demoAccountGuard.requireNotProtected(user.getEmail());
-
-    int rows = userMapper.updateName(userId, request.getDisplayName());
-    if (rows != 1) {
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authenticated user not found.");
-    }
-
-    User updated = requireActiveUser(userId);
-    return new MeResponse(updated.getId(), updated.getName(), updated.getEmail(), updated.getRole());
-  }
-
-
-  /**
-   * メールアドレスを更新する。
-   * ※email再利用は今回は対応しない（DBのUNIQUE制約に従い、退会ユーザーのemailも再利用不可）。
-   *
-   * @param userId  ログイン中ユーザーID
-   * @param request メール変更（email）
-   * @return 更新後のログイン中ユーザー情報
-   */
-  @Transactional
-  public MeResponse updateEmail(Long userId, UpdateUserMeRequest request) {
-
-    User user = requireActiveUser(userId);
-
-    // デモアカウントは更新不可（バックエンドで強制）
-    demoAccountGuard.requireNotProtected(user.getEmail());
-
-    try {
-      int rows = userMapper.updateEmail(userId, request.getEmail());
-      if (rows != 1) {
-        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authenticated user not found.");
-      }
-    } catch (DuplicateKeyException e) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "Email is already registered.");
-    }
-
-    User updated = requireActiveUser(userId);
-    return new MeResponse(updated.getId(), updated.getName(), updated.getEmail(), updated.getRole());
-  }
-
-
-  /**
    * パスワードを変更する。
    *
    * @param userId  ログイン中ユーザーID
