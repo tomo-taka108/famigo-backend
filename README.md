@@ -95,28 +95,23 @@ https://famigo-odekake.com
 
 
 ## API仕様書
-- Swagger UI（ローカル開発用）
-    - `http://localhost:8080/swagger-ui/index.html`
-- OpenAPI JSON
-    - `http://localhost:8080/v3/api-docs`
-
-※本番（prod）では安全のため Swagger は無効化しています。
+[SwaggerによるAPI仕様書](https://tomo-taka108.github.io/famigo-backend/)
 
 
 ## APIのURL設計
 
 ### 外部認証
-| メソッド | エンドポイント | 説明                      | 認可 |
-|------|---------|-------------------------|---|
-| POST | `/auth/register` | ユーザー情報を新規登録する（登録後にJWT発行） | GUEST |
-| POST | `/auth/login` | ログインする（JWT発行）           | GUEST |
-| GET  | `/auth/me` | 自分のユーザー情報を取得する          | USER/ADMIN |
+| メソッド | エンドポイント              | 説明                      | 認可 |
+|------|----------------------|-------------------------|---|
+| POST | `/api/auth/register` | ユーザー情報を新規登録する（登録後にJWT発行） | GUEST |
+| POST | `/api/auth/login`        | ログインする（JWT発行）           | GUEST |
+| GET  | `/api/auth/me`           | 自分のユーザー情報を取得する          | USER/ADMIN |
 
 ### スポット
 | メソッド | エンドポイント | 説明                         | 認可 |
 |---|---|----------------------------|---|
-| GET | `/spots` | 検索条件（※）を任意に指定してスポット一覧を取得する | GUEST |
-| GET | `/spots/{id}` | 指定したスポットの詳細情報を取得する         | GUEST |
+| GET | `/api/spots` | 検索条件（※）を任意に指定してスポット一覧を取得する | GUEST |
+| GET | `/api/spots/{id}` | 指定したスポットの詳細情報を取得する         | GUEST |
 
 **（※）検索条件**<br>
 　キーワード、カテゴリ、予算、対象年齢、設備情報<br>
@@ -127,38 +122,29 @@ https://famigo-odekake.com
 ### カテゴリ
 | メソッド | エンドポイント | 説明          | 認可 |
 |---|---|-------------|---|
-| GET | `/categories` | カテゴリ一覧を取得する | GUEST |
-
-### 設備（スポット設備）
-| メソッド | エンドポイント | 説明                 | 認可 |
-|---|---|--------------------|---|
-| GET | `/spot-facilities/{spotId}` | 指定したスポットの設備情報を取得する | （現状：ログイン必須扱い） |
-
-※スポット詳細には設備情報を含めて返しているため、基本は詳細APIで足ります（用途に応じて整理予定）
+| GET | `/api/categories` | カテゴリ一覧を取得する | GUEST |
 
 ### レビュー
 | メソッド | エンドポイント | 説明                    | 認可 |
 |---|---|-----------------------|---|
-| GET | `/spots/{spotId}/reviews` | 指定したスポットのレビュー一覧を取得する  | GUEST |
-| POST | `/spots/{spotId}/reviews` | 指定したスポットのレビューを投稿する    | USER/ADMIN |
-| PUT | `/spots/{spotId}/reviews/{reviewId}` | 指定したスポットの自分のレビューを編集する | USER/ADMIN |
-| DELETE | `/spots/{spotId}/reviews/{reviewId}` | 指定したスポットの自分のレビューを削除する | USER/ADMIN |
+| GET | `/api/spots/{spotId}/reviews` | 指定したスポットのレビュー一覧を取得する  | GUEST |
+| POST | `/api/spots/{spotId}/reviews` | 指定したスポットのレビューを投稿する    | USER/ADMIN |
+| PUT | `/api/spots/{spotId}/reviews/{reviewId}` | 指定したスポットの自分のレビューを編集する | USER/ADMIN |
+| DELETE | `/api/spots/{spotId}/reviews/{reviewId}` | 指定したスポットの自分のレビューを削除する | USER/ADMIN |
 
 ### お気に入り
 | メソッド | エンドポイント | 説明                  | 認可 |
 |---|---|---------------------|---|
-| GET | `/favorites` | 自分のお気に入りスポット一覧を取得する | USER/ADMIN |
-| POST | `/spots/{spotId}/favorites` | 指定したスポットをお気に入り登録する  | USER/ADMIN |
-| DELETE | `/spots/{spotId}/favorites` | 指定したスポットをお気に入り解除する  | USER/ADMIN |
+| GET | `/api/favorites` | 自分のお気に入りスポット一覧を取得する | USER/ADMIN |
+| POST | `/api/spots/{spotId}/favorites` | 指定したスポットをお気に入り登録する  | USER/ADMIN |
+| DELETE | `/api/spots/{spotId}/favorites` | 指定したスポットをお気に入り解除する  | USER/ADMIN |
 
 ### ユーザー情報の管理
 | メソッド | エンドポイント | 説明                          | 認可 |
 |---|---|-----------------------------|---|
-| PUT | `/users/me/profile` | 自分の表示名とメールアドレスを更新する（原子性を考慮） | USER/ADMIN |
-| PUT | `/users/me/display-name` | 自分の表示名を更新する                 | USER/ADMIN |
-| PUT | `/users/me/email` | 自分のメールアドレスを更新する             | USER/ADMIN |
-| PUT | `/users/me/password` | 自分のパスワード変更する                | USER/ADMIN |
-| DELETE | `/users/me` | 退会する（ユーザー情報の論理削除）           | USER/ADMIN |
+| PUT | `/api/users/me/profile` | 自分の表示名とメールアドレスを更新する（原子性を考慮） | USER/ADMIN |
+| PUT | `/api/users/me/password` | 自分のパスワードを変更する               | USER/ADMIN |
+| DELETE | `/api/users/me` | 退会する（ユーザー情報の論理削除）           | USER/ADMIN |
 
 ### ALBのヘルスチェック
 | メソッド | エンドポイント   | 説明             | 認可 |
