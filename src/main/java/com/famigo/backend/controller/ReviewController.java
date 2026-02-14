@@ -2,6 +2,7 @@ package com.famigo.backend.controller;
 
 import com.famigo.backend.dto.ReviewUpsertRequest;
 import com.famigo.backend.dto.ReviewListItemDto;
+import com.famigo.backend.exception.ErrorResponse;
 import com.famigo.backend.security.AppUserPrincipal;
 import com.famigo.backend.service.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,9 +10,11 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,24 +23,21 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 「スポット一件のレビュー一覧」を提供する REST API の Controller クラスです。スポット詳細画面から呼び出されます。
  */
+@Tag(name = "レビュー", description = "スポットのレビュー一覧 / 投稿 / 編集 / 削除")
 @RestController
-@RequestMapping("/spots")   // このコントローラーで扱うURLの共通プレフィックスを設定
-@RequiredArgsConstructor    // finalフィールドを引数に持つコンストラクタを自動生成
+@RequestMapping("/api/spots")
+@RequiredArgsConstructor
 public class ReviewController {
 
   private final ReviewService reviewService;
 
-  /**
-   * 指定したスポットIDのスポットに関するレビュー一覧を取得するエンドポイント。
-   *
-   * @param spotId 取得対象のスポットID
-   * @return List<ReviewListItemDto>（スポット１件のレビュー一覧）
-   */
+
   @Operation(
       summary = "レビュー一覧取得【スポットID指定】",
       description = "パスで指定されたスポットIDに紐づくレビュー一覧を取得します。",
@@ -47,70 +47,110 @@ public class ReviewController {
               description = "レビュー一覧取得成功",
               content = @Content(
                   mediaType = "application/json",
-                  array = @ArraySchema(
-                      schema = @Schema(implementation = ReviewListItemDto.class)
-                  )
+                  array = @ArraySchema(schema = @Schema(implementation = ReviewListItemDto.class))
+              )
+          ),
+          @ApiResponse(
+              responseCode = "404",
+              description = "スポットが存在しない",
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = ErrorResponse.class)
+              )
+          ),
+          @ApiResponse(
+              responseCode = "500",
+              description = "想定外エラー",
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = ErrorResponse.class)
               )
           )
-          // 将来的に 400 / 404 / 500 などをハンドリングする場合は、ここに ApiResponse を追加していく想定
       }
   )
-
   @GetMapping("/{spotId}/reviews")
   public List<ReviewListItemDto> getReviewsBySpotId(@PathVariable Long spotId) {
     return reviewService.getReviewsBySpotId(spotId);
   }
 
 
-  /**
-   * 指定したスポットIDのスポットにレビューを新規投稿するエンドポイント。
-   *
-   * @param spotId    投稿対象のスポットID
-   * @param request   レビュー投稿リクエストDTO（バリデーション対象）
-   * @param principal ログイン中ユーザー情報（JWTから復元）
-   */
   @Operation(
       summary = "スポット1件についてレビュー投稿【スポットID指定】",
       description = "パスで指定されたスポットIDに対して、ログイン中ユーザーがレビューを投稿します。",
       responses = {
+          @ApiResponse(responseCode = "204", description = "レビュー投稿成功（No Content）", content = @Content),
           @ApiResponse(
-              responseCode = "200",
-              description = "レビュー投稿成功"
+              responseCode = "400",
+              description = "入力不正（バリデーションエラー）",
+              content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+          ),
+          @ApiResponse(
+              responseCode = "401",
+              description = "未ログイン / トークン不正",
+              content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+          ),
+          @ApiResponse(
+              responseCode = "403",
+              description = "権限不足（GUEST等）",
+              content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+          ),
+          @ApiResponse(
+              responseCode = "404",
+              description = "スポットが存在しない",
+              content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+          ),
+          @ApiResponse(
+              responseCode = "500",
+              description = "想定外エラー",
+              content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
           )
-          // 将来的に 400 / 404 / 500 などをハンドリングする場合は、ここに ApiResponse を追加していく想定
       }
   )
   @PostMapping("/{spotId}/reviews")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
   public void createReview(
       @PathVariable Long spotId,
       @RequestBody @Valid ReviewUpsertRequest request,
       @AuthenticationPrincipal AppUserPrincipal principal
   ) {
-    Long userId = principal.getUserId();
-    reviewService.createReview(spotId, userId, request);
+    reviewService.createReview(spotId, principal.getUserId(), request);
   }
 
 
-  /**
-   * 指定したスポットID配下のレビューを編集するエンドポイント。
-   *
-   * @param spotId    スポットID
-   * @param reviewId  レビューID
-   * @param request   レビュー編集リクエストDTO
-   * @param principal ログインユーザー情報（JWTから復元）
-   */
   @Operation(
       summary = "レビュー編集【スポットID + レビューID指定】",
       description = "パスで指定されたスポットID配下のレビューを編集します（本人のみ。将来はADMIN例外）。",
       responses = {
+          @ApiResponse(responseCode = "204", description = "レビュー編集成功（No Content）", content = @Content),
           @ApiResponse(
-              responseCode = "200",
-              description = "レビュー編集成功"
+              responseCode = "400",
+              description = "入力不正（バリデーションエラー）",
+              content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+          ),
+          @ApiResponse(
+              responseCode = "401",
+              description = "未ログイン / トークン不正",
+              content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+          ),
+          @ApiResponse(
+              responseCode = "403",
+              description = "権限不足（本人以外など）",
+              content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+          ),
+          @ApiResponse(
+              responseCode = "404",
+              description = "スポット or レビューが存在しない",
+              content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+          ),
+          @ApiResponse(
+              responseCode = "500",
+              description = "想定外エラー",
+              content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
           )
-          // 400 / 401 / 403 / 404 / 500 は共通ハンドリング（GlobalExceptionHandler / Security）
       }
   )
   @PutMapping("/{spotId}/reviews/{reviewId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
   public void updateReview(
       @PathVariable Long spotId,
       @PathVariable Long reviewId,
@@ -127,25 +167,35 @@ public class ReviewController {
   }
 
 
-  /**
-   * 指定したスポットID配下のレビューを削除（論理削除）するエンドポイント。
-   *
-   * @param spotId    スポットID
-   * @param reviewId  レビューID
-   * @param principal ログインユーザー情報（JWTから復元）
-   */
   @Operation(
       summary = "レビュー削除【スポットID + レビューID指定】",
       description = "パスで指定されたスポットID配下のレビューを削除します（論理削除）。本人のみ。将来はADMIN例外。",
       responses = {
+          @ApiResponse(responseCode = "204", description = "レビュー削除成功（No Content）", content = @Content),
           @ApiResponse(
-              responseCode = "200",
-              description = "レビュー削除成功"
+              responseCode = "401",
+              description = "未ログイン / トークン不正",
+              content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+          ),
+          @ApiResponse(
+              responseCode = "403",
+              description = "権限不足（本人以外など）",
+              content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+          ),
+          @ApiResponse(
+              responseCode = "404",
+              description = "スポット or レビューが存在しない",
+              content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+          ),
+          @ApiResponse(
+              responseCode = "500",
+              description = "想定外エラー",
+              content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
           )
-          // 401 / 403 / 404 / 500 は共通ハンドリング（GlobalExceptionHandler / Security）
       }
   )
   @DeleteMapping("/{spotId}/reviews/{reviewId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
   public void deleteReview(
       @PathVariable Long spotId,
       @PathVariable Long reviewId,
@@ -158,5 +208,4 @@ public class ReviewController {
         principal.getRole()
     );
   }
-
 }
