@@ -13,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -20,6 +21,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * Authorization（認可）ヘッダの Bearer JWT を読み取り、SecurityContext に Authentication をセットするフィルタ。
  * - JWTが有効でも、ユーザーが退会（論理削除）済みなら未ログイン扱いにする（DBで active user を確認）
  */
+@Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final JwtTokenProvider jwtTokenProvider;
