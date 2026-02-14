@@ -12,6 +12,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.famigo.backend.dto.SpotDetailDto;
 import com.famigo.backend.dto.SpotListItemDto;
 import com.famigo.backend.exception.GlobalExceptionHandler;
+import com.famigo.backend.mapper.UserMapper;
+import com.famigo.backend.security.JwtTokenProvider;
 import com.famigo.backend.service.SpotService;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -33,11 +35,18 @@ class SpotControllerTest {
   @MockitoBean
   private SpotService spotService;
 
+  // 保険
+  @MockitoBean
+  private JwtTokenProvider jwtTokenProvider;
+
+  @MockitoBean
+  private UserMapper userMapper;
+
   @Test
   void スポット一覧_200で返ること() throws Exception {
     when(spotService.getSpotList(any(), any())).thenReturn(List.of(new SpotListItemDto()));
 
-    mockMvc.perform(get("/spots"))
+    mockMvc.perform(get("/api/spots"))
         .andExpect(status().isOk());
 
     verify(spotService, times(1)).getSpotList(any(), any());
@@ -51,7 +60,7 @@ class SpotControllerTest {
 
     when(spotService.getSpotDetail(eq(1L), any())).thenReturn(dto);
 
-    mockMvc.perform(get("/spots/1"))
+    mockMvc.perform(get("/api/spots/1"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(1))
         .andExpect(jsonPath("$.name").value("テストスポット"));

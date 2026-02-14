@@ -8,6 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.famigo.backend.dto.CategoryDto;
 import com.famigo.backend.exception.GlobalExceptionHandler;
+import com.famigo.backend.mapper.UserMapper;
+import com.famigo.backend.security.JwtTokenProvider;
 import com.famigo.backend.service.CategoryService;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -29,11 +31,18 @@ class CategoryControllerTest {
   @MockitoBean
   private CategoryService categoryService;
 
+  // Securityフィルタが生成される構成でも Context が落ちないように保険でモック
+  @MockitoBean
+  private JwtTokenProvider jwtTokenProvider;
+
+  @MockitoBean
+  private UserMapper userMapper;
+
   @Test
   void カテゴリ一覧_200で返ること() throws Exception {
     when(categoryService.getAll()).thenReturn(List.of(new CategoryDto()));
 
-    mockMvc.perform(get("/categories"))
+    mockMvc.perform(get("/api/categories"))
         .andExpect(status().isOk());
 
     verify(categoryService, times(1)).getAll();
