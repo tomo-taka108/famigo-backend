@@ -27,6 +27,19 @@ public class UserSelfService {
   private final DemoAccountGuard demoAccountGuard;
 
   /**
+   * ログイン中ユーザーの情報（Me）を取得する。
+   *
+   * @param userId ログイン中ユーザーID
+   * @return MeResponse（id/name/email/role）
+   */
+  @Transactional(readOnly = true)
+  public MeResponse getMe(Long userId) {
+    User user = requireActiveUser(userId);
+    return new MeResponse(user.getId(), user.getName(), user.getEmail(), user.getRole());
+  }
+
+
+  /**
    * プロフィール（表示名 + メールアドレス）をまとめて更新する。
    * 【用途】
    * - アカウント設定画面の「更新」ボタン
