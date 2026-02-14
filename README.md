@@ -101,11 +101,18 @@ https://famigo-odekake.com
 ## APIのURL設計
 
 ### 外部認証
-| メソッド | エンドポイント              | 説明                      | 認可 |
-|------|----------------------|-------------------------|---|
-| POST | `/api/auth/register` | ユーザー情報を新規登録する（登録後にJWT発行） | GUEST |
-| POST | `/api/auth/login`        | ログインする（JWT発行）           | GUEST |
-| GET  | `/api/auth/me`           | 自分のユーザー情報を取得する          | USER/ADMIN |
+| メソッド | エンドポイント           | 説明                      | 認可 |
+|------|-------------------|-------------------------|---|
+| POST | `/api/users`      | ユーザー情報を新規登録する（登録後にJWT発行） | GUEST |
+| POST | `/api/auth/token` | ログインする（JWT発行）           | GUEST |
+
+### ユーザー情報管理
+| メソッド | エンドポイント          | 説明                          | 認可 |
+|---|------------------|-----------------------------|---|
+| GET  | `/api/users/me`  | 自分のユーザー情報を取得する              | USER/ADMIN |
+| PUT | `/api/users/me`  | 自分のプロフィール（表示名＋メールアドレス）を変更する | USER/ADMIN |
+| PUT | `/api/users/me/password` | 自分のパスワードを変更する               | USER/ADMIN |
+| DELETE | `/api/users/me`  | 退会する（ユーザー情報の論理削除）           | USER/ADMIN |
 
 ### スポット
 | メソッド | エンドポイント | 説明                         | 認可 |
@@ -136,15 +143,8 @@ https://famigo-odekake.com
 | メソッド | エンドポイント | 説明                  | 認可 |
 |---|---|---------------------|---|
 | GET | `/api/favorites` | 自分のお気に入りスポット一覧を取得する | USER/ADMIN |
-| POST | `/api/spots/{spotId}/favorites` | 指定したスポットをお気に入り登録する  | USER/ADMIN |
-| DELETE | `/api/spots/{spotId}/favorites` | 指定したスポットをお気に入り解除する  | USER/ADMIN |
-
-### ユーザー情報の管理
-| メソッド | エンドポイント | 説明                          | 認可 |
-|---|---|-----------------------------|---|
-| PUT | `/api/users/me/profile` | 自分の表示名とメールアドレスを更新する（原子性を考慮） | USER/ADMIN |
-| PUT | `/api/users/me/password` | 自分のパスワードを変更する               | USER/ADMIN |
-| DELETE | `/api/users/me` | 退会する（ユーザー情報の論理削除）           | USER/ADMIN |
+| POST | `/api/favorites/{spotId}` | 指定したスポットをお気に入り登録する  | USER/ADMIN |
+| DELETE | `/api/favorites/{spotId}` | 指定したスポットをお気に入り解除する  | USER/ADMIN |
 
 ### ALBのヘルスチェック
 | メソッド | エンドポイント   | 説明             | 認可 |
