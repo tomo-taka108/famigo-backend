@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import com.famigo.backend.dto.user.UpdateUserMeRequest;
 import com.famigo.backend.entity.User;
 import com.famigo.backend.mapper.UserMapper;
+import com.famigo.backend.security.DemoAccountGuard;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,8 +22,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * User自己管理（profile/email/password/withdraw）は
- * 認証と直結しているので「失敗時のステータス」が重要。
+ * User自己管理（profile/email/password/withdraw）は認証と直結しているため、
+ * 「失敗時のステータス（401/403/409など）」と「DB更新が呼ばれること」が重要。
  */
 @ExtendWith(MockitoExtension.class)
 class UserSelfServiceTest {
@@ -33,24 +34,28 @@ class UserSelfServiceTest {
   @Mock
   private PasswordEncoder passwordEncoder;
 
+  @Mock
+  private DemoAccountGuard demoAccountGuard;
+
   private UserSelfService sut;
 
   @BeforeEach
   void before() {
-    sut = new UserSelfService(userMapper, passwordEncoder);
+    sut = new UserSelfService(userMapper, passwordEncoder, demoAccountGuard);
   }
 
   @Test
   void 退会_有効ユーザーならwithdrawが呼ばれること() {
     User user = new User();
     user.setId(1L);
+    user.setEmail("test1@example.com");
 
     when(userMapper.findActiveById(1L)).thenReturn(user);
     when(userMapper.withdraw(eq(1L), anyString())).thenReturn(1);
 
     sut.withdraw(1L);
 
-    // withdraw の内部で「退会ユーザー名」を付与してupdateする仕様
+    // withdraw の内部で「退会ユーザー名」を付与して update する仕様
     verify(userMapper, times(1)).withdraw(eq(1L), anyString());
   }
 
@@ -58,6 +63,7 @@ class UserSelfServiceTest {
   void パスワード変更_現在パスワード不一致は401になること() {
     User user = new User();
     user.setId(1L);
+    user.setEmail("test1@example.com");
     user.setPasswordHash("hashed");
 
     when(userMapper.findActiveById(1L)).thenReturn(user);
@@ -67,13 +73,13 @@ class UserSelfServiceTest {
         null,                 // email（このメソッドでは未使用）
         "wrongwrong",         // currentPassword
         "newnew",             // newPassword
-        "newnew"              // newPasswordConfirm（Serviceでは一致チェックしない。Controllerのバリデーション想定）
+        "newnew"              // newPasswordConfirm（一致チェックはController層のバリデーション想定）
     );
 
     when(passwordEncoder.matches("wrongwrong", "hashed")).thenReturn(false);
 
     ResponseStatusException ex = assertThrows(ResponseStatusException.class,
-        () -> sut.changePassword(1L,request));
+        () -> sut.changePassword(1L, request));
 
     assertEquals(HttpStatus.UNAUTHORIZED, ex.getStatusCode());
   }

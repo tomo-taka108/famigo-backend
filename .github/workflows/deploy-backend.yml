@@ -3,6 +3,9 @@ name: Deploy Backend (S3 + SSM)
 on:
   push:
     branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
 
 permissions:
   id-token: write
@@ -14,8 +17,31 @@ env:
   S3_KEY: backend/app.jar
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+  test:
+    runs-on: ubuntu-22.04
+
+    # CIでは Testcontainers を使わず、MySQLサービスに接続する
+    services:
+      mysql:
+        image: mysql:8.0.42
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_DATABASE: famigo_test
+          MYSQL_USER: test
+          MYSQL_PASSWORD: test
+          MYSQL_ROOT_PASSWORD: root
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+
+    env:
+      # MybatisTestBase が CI のときに読む接続情報
+      TEST_MYSQL_JDBC_URL: jdbc:mysql://127.0.0.1:3306/famigo_test?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Tokyo
+      TEST_MYSQL_USERNAME: test
+      TEST_MYSQL_PASSWORD: test
 
     steps:
       - name: Checkout
@@ -27,14 +53,47 @@ jobs:
           distribution: temurin
           java-version: "21"
 
-      - name: Build app.jar
+      # MySQL service の起動待ち（healthcheckがあるので保険）
+      - name: Wait for MySQL
+        run: |
+          set -eux
+          for i in {1..60}; do
+            if mysqladmin ping -h 127.0.0.1 -utest -ptest --silent; then
+              echo "MySQL is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "MySQL did not become ready in time"
+          exit 1
+
+      - name: Run tests
         run: |
           chmod +x ./gradlew
-          ./gradlew clean bootJar
+          ./gradlew clean test --no-daemon
+
+  deploy:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Build bootJar (app.jar)
+        run: |
+          chmod +x ./gradlew
+          ./gradlew bootJar --no-daemon
 
       - name: Prepare artifact (pick bootJar, not plain)
         run: |
-          # bootJarは plain ではない方（-plain.jar を除外）
           JAR_PATH="$(ls -1 build/libs/*.jar | grep -v -- '-plain\.jar$' | head -n 1)"
           echo "JAR_PATH=$JAR_PATH"
           cp "$JAR_PATH" app.jar
@@ -53,7 +112,6 @@ jobs:
       - name: Deploy on EC2 via SSM (tag target)
         run: |
           set -e
-
           CMD_ID=$(aws ssm send-command \
             --document-name "AWS-RunShellScript" \
             --comment "Deploy Famigo backend (docker rebuild)" \
@@ -71,6 +129,5 @@ jobs:
             ]' \
             --query "Command.CommandId" --output text \
             --region "${AWS_REGION}")
-
           echo "SSM CommandId=${CMD_ID}"
           echo "SSM command was sent. Check result in AWS Systems Manager -> Run Command history."
