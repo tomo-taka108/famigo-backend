@@ -27,10 +27,16 @@ jobs:
           distribution: temurin
           java-version: "21"
 
-      - name: Build app.jar
+      # テストを先に走らせる
+      - name: Run tests
         run: |
           chmod +x ./gradlew
-          ./gradlew clean bootJar
+          ./gradlew clean test --no-daemon
+
+      # テストが通ったら jar を作る
+      - name: Build bootJar (app.jar)
+        run: |
+          ./gradlew bootJar --no-daemon
 
       - name: Prepare artifact (pick bootJar, not plain)
         run: |
