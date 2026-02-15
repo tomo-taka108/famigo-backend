@@ -18,7 +18,8 @@ env:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # ubuntu-latest は揺れるので固定（Docker周りの事故を避ける）
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout
@@ -30,6 +31,13 @@ jobs:
           distribution: temurin
           java-version: "21"
 
+      # Testcontainers 用：Docker デーモン起動＆疎通確認
+      - name: Ensure Docker is running
+        run: |
+          sudo systemctl start docker
+          docker --version
+          docker info
+
       # テストを先に走らせる（PRでもここだけ実行）
       - name: Run tests
         run: |
@@ -40,7 +48,8 @@ jobs:
     needs: test
     # main への push のときだけデプロイ（PRでは絶対に実行しない）
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    # こちらも固定
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout
