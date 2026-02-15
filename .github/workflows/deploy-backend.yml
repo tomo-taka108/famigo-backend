@@ -18,8 +18,11 @@ env:
 
 jobs:
   test:
-    # ubuntu-latest は揺れるので固定（Docker周りの事故を避ける）
     runs-on: ubuntu-22.04
+
+    # Testcontainers が Docker を掴みやすくする
+    env:
+      DOCKER_HOST: unix:///var/run/docker.sock
 
     steps:
       - name: Checkout
@@ -31,14 +34,32 @@ jobs:
           distribution: temurin
           java-version: "21"
 
-      # Testcontainers 用：Docker デーモン起動＆疎通確認
-      - name: Ensure Docker is running
+      # Docker起動 + 権限調整 + 疎通確認（ここが重要）
+      - name: Ensure Docker is running (for Testcontainers)
         run: |
+          set -eux
+
           sudo systemctl start docker
+          sudo systemctl status docker --no-pager || true
+
+          echo "=== whoami / groups ==="
+          whoami
+          id
+          groups
+
+          echo "=== docker.sock ==="
+          ls -l /var/run/docker.sock || true
+
+          # runnerユーザーをdockerグループへ（権限問題の王道）
+          sudo usermod -aG docker $USER || true
+
+          # docker.sock の権限が厳しくて Testcontainers が死ぬことがあるので保険
+          sudo chmod 666 /var/run/docker.sock || true
+
+          echo "=== docker version/info ==="
           docker --version
           docker info
 
-      # テストを先に走らせる（PRでもここだけ実行）
       - name: Run tests
         run: |
           chmod +x ./gradlew
@@ -46,9 +67,7 @@ jobs:
 
   deploy:
     needs: test
-    # main への push のときだけデプロイ（PRでは絶対に実行しない）
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    # こちらも固定
     runs-on: ubuntu-22.04
 
     steps:
@@ -61,51 +80,4 @@ jobs:
           distribution: temurin
           java-version: "21"
 
-      # テストが通ったら jar を作る
-      - name: Build bootJar (app.jar)
-        run: |
-          chmod +x ./gradlew
-          ./gradlew bootJar --no-daemon
-
-      - name: Prepare artifact (pick bootJar, not plain)
-        run: |
-          # bootJarは plain ではない方（-plain.jar を除外）
-          JAR_PATH="$(ls -1 build/libs/*.jar | grep -v -- '-plain\.jar$' | head -n 1)"
-          echo "JAR_PATH=$JAR_PATH"
-          cp "$JAR_PATH" app.jar
-          ls -lh app.jar
-
-      - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_BACKEND_DEPLOY_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Upload app.jar to S3
-        run: |
-          aws s3 cp ./app.jar "s3://${S3_BUCKET}/${S3_KEY}"
-
-      - name: Deploy on EC2 via SSM (tag target)
-        run: |
-          set -e
-
-          CMD_ID=$(aws ssm send-command \
-            --document-name "AWS-RunShellScript" \
-            --comment "Deploy Famigo backend (docker rebuild)" \
-            --targets "Key=tag:Role,Values=famigo-api" \
-            --parameters commands='[
-              "set -e",
-              "sudo mkdir -p /opt/famigo-docker",
-              "cd /opt/famigo-docker",
-              "aws s3 cp s3://'${S3_BUCKET}'/'${S3_KEY}' ./app.jar.tmp",
-              "sudo mv ./app.jar.tmp ./app.jar",
-              "sudo chown ec2-user:ec2-user ./app.jar",
-              "sudo docker build -t famigo-api:latest .",
-              "sudo docker compose up -d --pull never",
-              "curl -fsS http://localhost:8080/health"
-            ]' \
-            --query "Command.CommandId" --output text \
-            --region "${AWS_REGION}")
-
-          echo "SSM CommandId=${CMD_ID}"
-          echo "SSM command was sent. Check result in AWS Systems Manager -> Run Command history."
+      - name: Build bootJar (app.jar
