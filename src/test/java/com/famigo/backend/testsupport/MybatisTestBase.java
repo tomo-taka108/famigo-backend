@@ -9,22 +9,6 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MySQLContainer;
 
-/**
- * Mapper層テスト用の共通土台
- * 狙い
- * - Testcontainers(MySQL)で実DBを起動
- * - Flywayで migration/seed を流す
- * - Mapperテストを「まとめ実行」しても落ちないようにする
- * 重要ポイント
- * - JUnit(Testcontainers拡張) に @Container を任せると
- *   「テストクラス毎にコンテナが停止」→ Spring Contextキャッシュと衝突しやすい。
- * - さらに @DynamicPropertySource 内で assumeTrue() すると
- *   Context生成が失敗扱いになり、CIで連鎖的にテストが落ちる。
- * → このクラスでは
- *   1) コンテナは JVM内シングルトンで遅延起動（必要になった時だけ start）
- *   2) テスト終了時に勝手に stop されない（= まとめ実行が安定）
- *   3) Docker判定で中断せず、起動に失敗したら原因付きで FAIL
- */
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ImportAutoConfiguration(FlywayAutoConfiguration.class)
@@ -34,25 +18,52 @@ public abstract class MybatisTestBase {
       new MySQLContainer<>("mysql:8.0.42")
           .withDatabaseName("famigo_test")
           .withUsername("test")
-          .withPassword("test");
+          .withPassword("test")
+          .withStartupAttempts(3);
 
   @DynamicPropertySource
   static void registerProps(DynamicPropertyRegistry registry) {
 
-    // ここで “assumeTrue(Docker利用可)” は絶対にしない
-    // 代わりに、必要なら起動して、失敗したら原因を出して落とす。
+    // GitHub Actions(CI)では Testcontainers を使わず、workflowのMySQL serviceへ接続
+    if (isGitHubActions()) {
+      String url = envOrFail("TEST_MYSQL_JDBC_URL");
+      String user = envOrFail("TEST_MYSQL_USERNAME");
+      String pass = envOrFail("TEST_MYSQL_PASSWORD");
+
+      registry.add("spring.datasource.url", () -> url);
+      registry.add("spring.datasource.username", () -> user);
+      registry.add("spring.datasource.password", () -> pass);
+      registry.add("spring.datasource.driver-class-name", () -> "com.mysql.cj.jdbc.Driver");
+
+      registry.add("spring.flyway.url", () -> url);
+      registry.add("spring.flyway.user", () -> user);
+      registry.add("spring.flyway.password", () -> pass);
+      return;
+    }
+
+    // ローカルは今まで通り Testcontainers(MySQL)
     startContainerIfNeeded();
 
-    // DataSource（MyBatis用）
     registry.add("spring.datasource.url", MYSQL::getJdbcUrl);
     registry.add("spring.datasource.username", MYSQL::getUsername);
     registry.add("spring.datasource.password", MYSQL::getPassword);
     registry.add("spring.datasource.driver-class-name", () -> "com.mysql.cj.jdbc.Driver");
 
-    // Flyway（同じDBへ流す）
     registry.add("spring.flyway.url", MYSQL::getJdbcUrl);
     registry.add("spring.flyway.user", MYSQL::getUsername);
     registry.add("spring.flyway.password", MYSQL::getPassword);
+  }
+
+  private static boolean isGitHubActions() {
+    return "true".equalsIgnoreCase(System.getenv("GITHUB_ACTIONS"));
+  }
+
+  private static String envOrFail(String key) {
+    String v = System.getenv(key);
+    if (v == null || v.isBlank()) {
+      throw new IllegalStateException("環境変数 " + key + " が未設定です（CIのMySQL接続情報）");
+    }
+    return v;
   }
 
   private static void startContainerIfNeeded() {
@@ -68,7 +79,6 @@ public abstract class MybatisTestBase {
       try {
         MYSQL.start();
 
-        // JVM終了時に停止（ローカル/CIどちらでも後始末できる）
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
           try {
             if (MYSQL.isRunning()) {
@@ -78,9 +88,7 @@ public abstract class MybatisTestBase {
             // shutdown hook内は握りつぶし
           }
         }));
-
       } catch (Exception e) {
-        // CIで「なぜ起動できないか」を明確にログへ出すため、failで落とす
         Assertions.fail("Testcontainers(MySQL) の起動に失敗しました: " + e.getMessage(), e);
       }
     }
