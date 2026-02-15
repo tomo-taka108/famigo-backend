@@ -14,40 +14,34 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * Mapper層テスト用の共通土台
  * - Testcontainers(MySQL)で実DBを起動
  * - Flywayを有効化して migration/seed を流す
+ * 改善点
+ * - static 初期化で MYSQL.start() しない（CIで ExceptionInInitializerError を起こしやすい）
+ * - JUnit(Testcontainers)のライフサイクルに任せる
+ * - Dockerが使えない環境ではスキップ（必要なら）
  */
-@ActiveProfiles("test") // Spring Boot の profile を test に切り替える。application-test.properties があればそれが優先される。
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE) // H2等に置き換えず、TestcontainersのDBを使う
-@ImportAutoConfiguration(FlywayAutoConfiguration.class) // テストでもFlywayを有効化（migrationを流す）
+@Testcontainers(disabledWithoutDocker = true)
+@ActiveProfiles("test")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@ImportAutoConfiguration(FlywayAutoConfiguration.class)
 public abstract class MybatisTestBase {
 
+  @Container
   private static final MySQLContainer<?> MYSQL =
       new MySQLContainer<>("mysql:8.0.42")
           .withDatabaseName("famigo_test")
           .withUsername("test")
           .withPassword("test");
 
-  /**
-   * クラスロード時に1回だけコンテナを起動する
-   *（テストを何クラスまとめ実行しても、同一コンテナを使い回す）
-   */
-  static {
-    MYSQL.start();
-  }
-
-  /**
-   * Springのプロパティに「起動したコンテナの接続情報」を注入する。
-   * ここをやることで application-test.properties にDB接続を書かなくて良い。
-   */
-  @DynamicPropertySource // テスト起動時にSpringのプロパティを動的に差し替える（＝コンテナの接続先を注入）
+  @DynamicPropertySource
   static void registerProps(DynamicPropertyRegistry registry) {
 
-    // DataSource：MyBatisが使う接続先（毎回コンテナのJDBC URLが変わるので動的に入れる）
+    // DataSource（MyBatis用）
     registry.add("spring.datasource.url", MYSQL::getJdbcUrl);
     registry.add("spring.datasource.username", MYSQL::getUsername);
     registry.add("spring.datasource.password", MYSQL::getPassword);
     registry.add("spring.datasource.driver-class-name", () -> "com.mysql.cj.jdbc.Driver");
 
-    // Flywayも同じDBに向ける（migration/seedをDataSourceと同一コンテナに流すため）
+    // Flyway（同じDBへ流す）
     registry.add("spring.flyway.url", MYSQL::getJdbcUrl);
     registry.add("spring.flyway.user", MYSQL::getUsername);
     registry.add("spring.flyway.password", MYSQL::getPassword);
