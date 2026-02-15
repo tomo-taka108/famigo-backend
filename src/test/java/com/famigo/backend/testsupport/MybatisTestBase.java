@@ -1,7 +1,5 @@
 package com.famigo.backend.testsupport;
 
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
-
 import org.junit.jupiter.api.Assertions;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
@@ -9,19 +7,23 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.MySQLContainer;
 
 /**
  * Mapper層テスト用の共通土台
+ * 狙い
  * - Testcontainers(MySQL)で実DBを起動
- * - Flywayを有効化して migration/seed を流す
- * 重要：
- * JUnit(Testcontainers)拡張にコンテナ停止を任せると「テストクラス毎に停止」される。
- * しかし Spring の ApplicationContext はキャッシュされるため、2クラス目以降が
- * 「停止済みコンテナへのURL」を掴んだままになり Connection refused を起こす。
- * → このクラスでは JUnit 拡張を使わず、DynamicPropertySource で遅延起動し、
- *   JVM内では MySQL コンテナを使い回す。
+ * - Flywayで migration/seed を流す
+ * - Mapperテストを「まとめ実行」しても落ちないようにする
+ * 重要ポイント
+ * - JUnit(Testcontainers拡張) に @Container を任せると
+ *   「テストクラス毎にコンテナが停止」→ Spring Contextキャッシュと衝突しやすい。
+ * - さらに @DynamicPropertySource 内で assumeTrue() すると
+ *   Context生成が失敗扱いになり、CIで連鎖的にテストが落ちる。
+ * → このクラスでは
+ *   1) コンテナは JVM内シングルトンで遅延起動（必要になった時だけ start）
+ *   2) テスト終了時に勝手に stop されない（= まとめ実行が安定）
+ *   3) Docker判定で中断せず、起動に失敗したら原因付きで FAIL
  */
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -37,14 +39,8 @@ public abstract class MybatisTestBase {
   @DynamicPropertySource
   static void registerProps(DynamicPropertyRegistry registry) {
 
-    // Docker が使えない環境では Mapper テストをスキップ
-    // （以前の @Testcontainers(disabledWithoutDocker = true) 相当）
-    assumeTrue(
-        DockerClientFactory.instance().isDockerAvailable(),
-        "Docker が利用できないため Mapper テストをスキップします"
-    );
-
-    // Spring Context 初期化タイミングで 1 回だけ起動し、テストクラス間で停止させない
+    // ここで “assumeTrue(Docker利用可)” は絶対にしない
+    // 代わりに、必要なら起動して、失敗したら原因を出して落とす。
     startContainerIfNeeded();
 
     // DataSource（MyBatis用）
@@ -72,18 +68,19 @@ public abstract class MybatisTestBase {
       try {
         MYSQL.start();
 
-        // JVM 終了時に停止（CI/ローカルのどちらでも後始末できる）
+        // JVM終了時に停止（ローカル/CIどちらでも後始末できる）
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
           try {
             if (MYSQL.isRunning()) {
               MYSQL.stop();
             }
           } catch (Exception ignored) {
-            // shutdown hook 内は握りつぶす
+            // shutdown hook内は握りつぶし
           }
         }));
+
       } catch (Exception e) {
-        // 起動失敗時に理由がログに出づらいので、明示して落とす
+        // CIで「なぜ起動できないか」を明確にログへ出すため、failで落とす
         Assertions.fail("Testcontainers(MySQL) の起動に失敗しました: " + e.getMessage(), e);
       }
     }
