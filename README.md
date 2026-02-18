@@ -83,7 +83,7 @@ https://famigo-odekake.com
 ## 操作画面
 
 - トップページ
-    - `docs/demo/landing.gif`（予定）
+![img.png](img.png)
 - スポット検索 → 一覧
     - `docs/demo/search.gif`（予定）
 - スポット詳細 → レビュー確認
