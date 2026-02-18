@@ -153,7 +153,94 @@ https://famigo-odekake.com
 
 
 ## ER図
-※ここはあとで画像を貼る想定です（例：`docs/er.png`）
+
+```mermaid
+erDiagram
+
+  USERS {
+    BIGINT id PK
+    VARCHAR name
+    VARCHAR email "UNIQUE"
+    VARCHAR password_hash
+    VARCHAR role "USER / ADMIN"
+    DATETIME created_at
+    DATETIME updated_at
+    TINYINT is_deleted "0/1(論理削除)"
+  }
+  
+  CATEGORIES {
+    INT id PK
+    VARCHAR name "UNIQUE"
+  }
+  
+  SPOTS {
+    BIGINT id PK
+    INT category_id FK
+    VARCHAR name
+    VARCHAR address
+    VARCHAR area
+    VARCHAR price_type "Enum(文字列)"
+    VARCHAR parking_info
+    VARCHAR toilet_info
+    VARCHAR target_age "Enum(文字列)"
+    VARCHAR staying_time "Enum(文字列)"
+    VARCHAR convenience_store
+    VARCHAR restaurant_info
+    VARCHAR google_map_url
+    VARCHAR closed_days
+    VARCHAR official_url
+    TEXT notes
+    DATETIME created_at
+    DATETIME updated_at
+    TINYINT is_deleted "0/1(論理削除)"
+  }
+  
+  SPOT_FACILITIES {
+    BIGINT spot_id PK,FK "spots.id と 1:1"
+    BOOLEAN diaper_changing
+    BOOLEAN stroller_ok
+    BOOLEAN playground
+    BOOLEAN athletics
+    BOOLEAN water_play
+    BOOLEAN indoor
+    DATETIME created_at
+    DATETIME updated_at
+    TINYINT is_deleted "0/1(論理削除)"
+  }
+  
+  REVIEWS {
+    BIGINT id PK
+    BIGINT spot_id FK
+    BIGINT user_id FK
+    VARCHAR child_age_group "Enum(文字列)"
+    INT rating
+    INT rating_cost
+    INT crowd_level
+    INT toilet_cleanliness
+    INT stroller_ease
+    TEXT review_text
+    INT cost_total
+    DATETIME created_at
+    DATETIME updated_at
+    TINYINT is_deleted "0/1(論理削除)"
+  }
+  
+  FAVORITES {
+    BIGINT user_id PK,FK
+    BIGINT spot_id PK,FK
+    DATETIME created_at
+    DATETIME updated_at
+    TINYINT is_deleted "0/1(論理削除)"
+  }
+  
+  CATEGORIES ||--o{ SPOTS : "1カテゴリに複数スポット"
+  SPOTS ||--|| SPOT_FACILITIES : "1スポットに設備1行(1:1)"
+  USERS ||--o{ REVIEWS : "1ユーザーが複数レビュー"
+  SPOTS ||--o{ REVIEWS : "1スポットに複数レビュー"
+  USERS ||--o{ FAVORITES : "1ユーザーが複数お気に入り"
+  SPOTS ||--o{ FAVORITES : "1スポットが複数お気に入り"
+```
+
 
 ### テーブル概要
 - `users`（一般ユーザー／管理者アカウントを管理する）
