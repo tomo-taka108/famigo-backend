@@ -86,25 +86,25 @@ https://famigo-odekake.com
 ![トップページ](images/UIトップ.png)
 
 ### ユーザー登録
-<video src="https://github.com/user-attachments/assets/e95c1a51-c2b1-49c5-841d-0defc9112a24" controls width="600"></video>
+<video src="https://github.com/user-attachments/assets/e95c1a51-c2b1-49c5-841d-0defc9112a24" controls style="width: 100%;"></video>
 
 ### ユーザーログイン → ログアウト
-<video src="https://github.com/user-attachments/assets/eea8e624-5639-4152-8bb4-d3dbefb0055c" controls width="600"></video>
+<video src="https://github.com/user-attachments/assets/eea8e624-5639-4152-8bb4-d3dbefb0055c" controls style="width: 100%;"></video>
 
 ### アカウント設定（プロフィール更新・パスワード変更）
-<video src="https://github.com/user-attachments/assets/94b0e9f7-4d78-437c-803d-1a0c4b52c651" controls width="600"></video>
+<video src="https://github.com/user-attachments/assets/94b0e9f7-4d78-437c-803d-1a0c4b52c651" controls style="width: 100%;"></video>
 
 ### スポット一覧表示 → 条件検索 → 条件該当のスポット一覧表示 → スポット詳細表示
-<video src="https://github.com/user-attachments/assets/f2851139-6315-4a48-b258-8dc1b753deea" controls width="600"></video>
+<video src="https://github.com/user-attachments/assets/f2851139-6315-4a48-b258-8dc1b753deea" controls style="width: 100%;"></video>
 
 ### レビュー閲覧 → レビュー投稿
-<video src="https://github.com/user-attachments/assets/a4ac4f1c-d41f-4eab-9677-c0a7cb4a7b32" controls width="600"></video>
+<video src="https://github.com/user-attachments/assets/a4ac4f1c-d41f-4eab-9677-c0a7cb4a7b32" controls style="width: 100%;"></video>
 
 ### 自分のレビュー編集 → 自分のレビュー削除
-<video src="https://github.com/user-attachments/assets/d0b84de7-e748-41e9-ae36-305f29494b2d" controls width="600"></video>
+<video src="https://github.com/user-attachments/assets/d0b84de7-e748-41e9-ae36-305f29494b2d" controls style="width: 100%;"></video>
 
 ### お気に入りの登録／解除 → お気に入り一覧表示
-<video src="https://github.com/user-attachments/assets/b43cbea6-41ad-45ba-a36c-2ecb267be01d" controls width="600"></video>
+<video src="https://github.com/user-attachments/assets/b43cbea6-41ad-45ba-a36c-2ecb267be01d" controls style="width: 100%;"></video>
 
 ### フォームバリデーション
 ![フォームバリデーション](images/フォームバリデーション.drawio.png)
