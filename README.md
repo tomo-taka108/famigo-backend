@@ -70,28 +70,44 @@ https://famigo-odekake.com
 - スポットの詳細表示
 - スポットの条件検索
 
-### お気に入り（ログイン必須）
-- お気に入りの一覧表示
-- お気に入りの登録／解除
-
 ### レビュー（ログイン必須）
 - レビューの一覧表示（未ログインでも閲覧可）
 - レビューの投稿
 - 自分のレビュー編集／削除
 
+### お気に入り（ログイン必須）
+- お気に入りの登録／解除
+- お気に入りの一覧表示
+
 
 ## 操作画面
 
-- トップページ
-![img.png](img.png)
-- スポット検索 → 一覧
-    - `docs/demo/search.gif`（予定）
-- スポット詳細 → レビュー確認
-    - `docs/demo/detail_review.gif`（予定）
-- ログイン → お気に入り → 一覧
-    - `docs/demo/favorites.gif`（予定）
-- アカウント設定（プロフィール更新・パスワード変更・退会）
-    - `docs/demo/account.gif`（予定）
+### トップページ
+![トップページ](images/UIトップ.png)
+
+### ユーザー登録
+<video src="images/ユーザー登録.mp4" controls width="600"></video>
+
+### ユーザーログイン → ログアウト
+<video src="images/ユーザーログイン・ログアウト.mp4" controls width="600"></video>
+
+### アカウント設定（プロフィール更新・パスワード変更）
+<video src="images/アカウント設定.mp4" controls width="600"></video>
+
+### スポット一覧表示 → 条件検索 → 条件該当のスポット一覧表示 → スポット詳細表示
+<video src="images/スポット検索.mp4" controls width="600"></video>
+
+### レビュー閲覧 → レビュー投稿
+<video src="images/レビュー閲覧・投稿.mp4" controls width="600"></video>
+
+### 自分のレビュー編集 → 自分のレビュー削除
+<video src="images/レビュー編集・削除.mp4" controls width="600"></video>
+
+### お気に入りの登録／解除 → お気に入り一覧表示
+<video src="images/お気に入り登録・解除・一覧.mp4" controls width="600"></video>
+
+### フォームバリデーション
+![フォームバリデーション](images/フォームバリデーション.drawio.png)
 
 
 ## API仕様書
@@ -260,7 +276,7 @@ erDiagram
 
 
 ## インフラ構成図
-![インフラ構成図](docs/infra.png)
+![インフラ構成図](images/infra.png)
 
 
 ## 自動テスト
