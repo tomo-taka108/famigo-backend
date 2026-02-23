@@ -3,8 +3,18 @@ name: Deploy Backend (S3 + SSM)
 on:
   push:
     branches: [ "main" ]
+    paths-ignore:
+      - "README.md"
+      - "docs/**"
+      - "images/**"
+      - "**/*.md"
   pull_request:
     branches: [ "main" ]
+    paths-ignore:
+      - "README.md"
+      - "docs/**"
+      - "images/**"
+      - "**/*.md"
   workflow_dispatch:
 
 permissions:
