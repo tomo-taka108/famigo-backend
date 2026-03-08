@@ -103,14 +103,6 @@ public class FavoriteController {
               )
           ),
           @ApiResponse(
-              responseCode = "404",
-              description = "スポットが存在しない",
-              content = @Content(
-                  mediaType = "application/json",
-                  schema = @Schema(implementation = ErrorResponse.class)
-              )
-          ),
-          @ApiResponse(
               responseCode = "500",
               description = "想定外エラー",
               content = @Content(

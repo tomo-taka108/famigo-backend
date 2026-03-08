@@ -8,7 +8,6 @@ import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import jakarta.validation.groups.Default;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,7 +15,7 @@ import lombok.Setter;
 
 /**
  * ユーザー登録（サインアップ）要求DTO
- * /auth/register で使用します。
+ * POST /api/users で使用します。
  * 【ポイント】
  * - 空欄のときは NotBlank だけを出す（Size の余計なエラーを出さない）
  *   → GroupSequence + groups を利用

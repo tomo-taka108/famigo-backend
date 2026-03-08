@@ -14,7 +14,7 @@ java {
 	}
 }
 
-// Lombokを正しく動かすための補助設定（とりあえずLombok使うならこれ書いておくのが安全！）
+// Lombokを正しく動かすための補助設定（Lombok使うならこれ書いておくのが安全！）
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
