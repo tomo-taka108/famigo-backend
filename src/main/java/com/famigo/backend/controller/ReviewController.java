@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 「スポット一件のレビュー一覧」を提供する REST API の Controller クラスです。スポット詳細画面から呼び出されます。
+ * 「スポット1件のレビュー一覧」を提供する REST API の Controller クラスです。スポット詳細画面から呼び出されます。
  */
 @Tag(name = "レビュー", description = "スポットのレビュー一覧 / 投稿 / 編集 / 削除")
 @RestController
@@ -48,14 +48,6 @@ public class ReviewController {
               content = @Content(
                   mediaType = "application/json",
                   array = @ArraySchema(schema = @Schema(implementation = ReviewListItemDto.class))
-              )
-          ),
-          @ApiResponse(
-              responseCode = "404",
-              description = "スポットが存在しない",
-              content = @Content(
-                  mediaType = "application/json",
-                  schema = @Schema(implementation = ErrorResponse.class)
               )
           ),
           @ApiResponse(
@@ -95,11 +87,6 @@ public class ReviewController {
               content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
           ),
           @ApiResponse(
-              responseCode = "404",
-              description = "スポットが存在しない",
-              content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
-          ),
-          @ApiResponse(
               responseCode = "500",
               description = "想定外エラー",
               content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
@@ -119,7 +106,7 @@ public class ReviewController {
 
   @Operation(
       summary = "レビュー編集【スポットID + レビューID指定】",
-      description = "パスで指定されたスポットID配下のレビューを編集します（本人のみ。将来はADMIN例外）。",
+      description = "パスで指定されたスポットID配下のレビューを編集します。USER は自分のレビューのみ、ADMIN は全レビューを編集できます。",
       responses = {
           @ApiResponse(responseCode = "204", description = "レビュー編集成功（No Content）", content = @Content),
           @ApiResponse(
@@ -169,7 +156,7 @@ public class ReviewController {
 
   @Operation(
       summary = "レビュー削除【スポットID + レビューID指定】",
-      description = "パスで指定されたスポットID配下のレビューを削除します（論理削除）。本人のみ。将来はADMIN例外。",
+      description = "パスで指定されたスポットID配下のレビューを削除します（論理削除）。USER は自分のレビューのみ、ADMIN は全レビューを削除できます。",
       responses = {
           @ApiResponse(responseCode = "204", description = "レビュー削除成功（No Content）", content = @Content),
           @ApiResponse(

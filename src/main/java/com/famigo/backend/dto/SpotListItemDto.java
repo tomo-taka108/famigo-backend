@@ -1,13 +1,12 @@
 package com.famigo.backend.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Schema(description = "スポット一覧カード１件分のデータモデル")
+@Schema(description = "スポット一覧カード1件分のデータモデル")
 @Getter
 @Setter
 @NoArgsConstructor

@@ -36,7 +36,7 @@ public class ProductionStartupValidation implements ApplicationRunner {
           "[prod] JWT_SECRET がテンプレ値のままです。安全のため起動を中断します。");
     }
 
-    // HS256は32文字以上が推奨（文字数ベースで雑にチェック）
+    // HS256は32文字以上が推奨（文字数ベースでチェック）
     if (jwtSecret.length() < 32) {
       throw new IllegalStateException(
           "[prod] JWT_SECRET が短すぎます（32文字以上推奨）。安全のため起動を中断します。");

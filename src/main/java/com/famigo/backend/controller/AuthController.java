@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 外部認証（ユーザー登録・ログイン）を提供する REST API の Controller クラスです。
  * ポイント：
  *   登録（POST /api/users）とログイン（POST /api/auth/token）をこのControllerでまとめて扱う。
- *   登録成功時も JWT を発行して返却（= 登録後に自動ログイン）する。</li>
+ *   登録成功時も JWT を発行して返却（= 登録後に自動ログイン）する。
  * ※ /api/users は「ユーザー作成」だが、実装上は登録後にJWT発行まで行うため「外部認証フロー」の一部として扱う。
  */
 @Tag(name = "外部認証", description = "ユーザー登録 / ログイン（JWT発行）")

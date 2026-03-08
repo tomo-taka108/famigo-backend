@@ -118,7 +118,7 @@ public class AuthService {
 
 
   /**
-   * 自分自身のユーザー情報を取得する（/auth/me 等で使用する）
+   * ログイン中ユーザーの情報を取得する（GET /api/users/me で使用）
    * 【ポイント】：
    *   userId はJWTから取り出した値を想定（Controller側で渡す）
    *   存在しない/無効ユーザーなら 401 を返す
