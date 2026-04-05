@@ -1,6 +1,8 @@
 name: Deploy Backend (S3 + SSM)
 
+# トリガー条件
 on:
+  # mainにpush時（mainにマージ時）
   push:
     branches: [ "main" ]
     paths-ignore:
@@ -8,6 +10,7 @@ on:
       - "docs/**"
       - "images/**"
       - "**/*.md"
+  # mainにPR時（deployはされずtestだけ実行）
   pull_request:
     branches: [ "main" ]
     paths-ignore:
@@ -17,30 +20,36 @@ on:
       - "**/*.md"
   workflow_dispatch:
 
+# GitHub Actionsに与える権限
 permissions:
-  id-token: write
-  contents: read
+  id-token: write  # AWSに安全にログインするためのOIDCトークンを発行する権限
+  contents: read  # リポジトリのコードを読む権限
 
+# workflow全体で使う共通変数
 env:
-  AWS_REGION: ap-northeast-1
-  S3_BUCKET: famigo-odekake-backend-artifacts
-  S3_KEY: backend/app.jar
+  AWS_REGION: ap-northeast-1  # AWS操作は東京リージョン前提
+  S3_BUCKET: famigo-odekake-backend-artifacts  # バックエンドのjarを置くS3バケット名
+  S3_KEY: backend/app.jar  # S3バケットの中の保存パス
 
+# ここからが本体（jobは test と deploy の2つ）
 jobs:
   test:
+    # Ubuntu 22.04 の GitHub Actions 実行環境で test ジョブを動かす（GitHub が一時的な Linux マシンを用意して、その中で処理）
     runs-on: ubuntu-22.04
 
     # CIでは Testcontainers を使わず、MySQLサービスに接続する
     services:
       mysql:
-        image: mysql:8.0.42
+        image: mysql:8.0.42  # MySQL 8.0.42 の Docker イメージを使う
         ports:
-          - 3306:3306
+          - 3306:3306  # MySQL の 3306 番ポートを開く設定（左側がホスト側、右側がコンテナ側）
+        # MySQLのコンテナ起動時の初期設定
         env:
           MYSQL_DATABASE: famigo_test
           MYSQL_USER: test
           MYSQL_PASSWORD: test
           MYSQL_ROOT_PASSWORD: root
+        # MySQLがちゃんと起動したか確認するための設定
         options: >-
           --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
           --health-interval=5s
@@ -53,10 +62,13 @@ jobs:
       TEST_MYSQL_USERNAME: test
       TEST_MYSQL_PASSWORD: test
 
+    # 実際に「何を順番にやるか」
     steps:
+      # GitHub リポジトリのコードを runner に取得する（まずコードを持ってくる）
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Java21をインストールして使えるようにする（workflow 側でも同じバージョン21を用意）
       - name: Set up Java 21
         uses: actions/setup-java@v4
         with:
@@ -77,31 +89,39 @@ jobs:
           echo "MySQL did not become ready in time"
           exit 1
 
+      # Gradle でテストを実行する
       - name: Run tests
         run: |
           chmod +x ./gradlew
           ./gradlew clean test --no-daemon
 
   deploy:
+    # testジョブが成功してからdeployを実行する
     needs: test
+    # pushでmainに入ったときだけdeployする（PR時ではtestはするけどdeployしない）
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-22.04
 
     steps:
+      # deployジョブも別のrunnerで動くので、もう一度コードを取得
       - name: Checkout
         uses: actions/checkout@v4
 
+      # jarを作るためにJava21が必要なので、ここでもセットアップする
       - name: Set up Java 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "21"
 
+      # Spring Bootアプリの実行用jarを作成
       - name: Build bootJar (app.jar)
         run: |
           chmod +x ./gradlew
           ./gradlew bootJar --no-daemon
 
+      # 作られた jar の中から、plain ではない方を選んで app.jar という名前でコピーする
+      # Gradle / Spring Boot では、場合によっては build/libs/ に複数 jar ができ、-plain.jar は、ただの通常 jar で、そのまま Spring Boot 実行に向かないことがある
       - name: Prepare artifact (pick bootJar, not plain)
         run: |
           JAR_PATH="$(ls -1 build/libs/*.jar | grep -v -- '-plain\.jar$' | head -n 1)"
@@ -109,16 +129,21 @@ jobs:
           cp "$JAR_PATH" app.jar
           ls -lh app.jar
 
+      # GitHub Actions が AWS を触れるようにする
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
+          # GitHub Secrets に入れてある AWS IAM ロール ARN（このロールの権限でAWSを触ってもよい）
           role-to-assume: ${{ secrets.AWS_BACKEND_DEPLOY_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
+      # 作成した app.jar を S3 に置く
       - name: Upload app.jar to S3
         run: |
           aws s3 cp ./app.jar "s3://${S3_BUCKET}/${S3_KEY}"
 
+      # 本番デプロイの本体
+      # GitHub Actions ➡ SSMでEC2に命令 ➡ EC2がS3からapp.jarを取得 ➡ Dockerイメージを再ビルド ➡ Docker Composeで再起動 ➡ health check
       - name: Deploy on EC2 via SSM (tag target)
         run: |
           set -e
