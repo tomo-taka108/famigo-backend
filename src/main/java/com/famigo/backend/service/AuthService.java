@@ -36,14 +36,17 @@ public class AuthService {
    */
   public LoginResponse register(RegisterRequest request) {
 
+    // 二重登録のチェック
     User existing = userMapper.findActiveByEmail(request.getEmail());
 
     if (existing != null) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, "Email is already registered.");
     }
 
+    // パスワードをBCryptによりハッシュ化
     String hashed = passwordEncoder.encode(request.getPassword());
 
+    // DB保存用の型（User）を作成し、リクエストデータや初期値をセット
     User user = new User();
     user.setName(request.getDisplayName());   // 表示名 → users.name
     user.setEmail(request.getEmail());
@@ -51,6 +54,7 @@ public class AuthService {
     user.setRole("USER");
     user.setIsDeleted(false);
 
+    // DBへの挿入実行（成功すると rows に 1 が入る）
     try {
       int rows = userMapper.insert(user);
 
@@ -59,14 +63,17 @@ public class AuthService {
       }
 
     } catch (DuplicateKeyException e) {
-      // 同時登録などで UNIQUE(email) に引っかかった場合
+      // 同時登録などで UNIQUE(email) に引っかかった場合、409エラー（競合）を返す
       throw new ResponseStatusException(HttpStatus.CONFLICT, "Email is already registered.");
     }
 
+    // JWT（アクセストークン）を発行。これにより登録直後に自動でログイン状態（オートログイン）にできる。
     String token = jwtTokenProvider.generateToken(user.getId(), user.getEmail(), user.getRole());
 
+    // フロントに返す「ログイン中ユーザー情報」の作成
     MeResponse me = new MeResponse(user.getId(), user.getName(), user.getEmail(), user.getRole());
 
+    // ログインレスポンスをクライアントに返す
     return new LoginResponse(
         token,
         "Bearer",
@@ -89,25 +96,27 @@ public class AuthService {
    */
   public LoginResponse login(LoginRequest request) {
 
+    // ユーザーの存在確認（見つからない場合、401エラーを返す）
     User user = userMapper.findActiveByEmail(request.getEmail());
 
     if (user == null) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password.");
     }
 
+    // 入力パスワード（平文）とDBのパスワードハッシュを照合（ハッシュ化して比較）。一致しない場合、401エラーを返す
     boolean ok = passwordEncoder.matches(request.getPassword(), user.getPasswordHash());
-    // 入力パスワード（平文）とDBのパスワードハッシュを照合（ハッシュ化して比較）
 
     if (!ok) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password.");
     }
 
-    String token = jwtTokenProvider.generateToken(user.getId(), user.getEmail(), user.getRole());
     // JWTを生成（userId / email / role をpayloadに含める）
+    String token = jwtTokenProvider.generateToken(user.getId(), user.getEmail(), user.getRole());
 
+    // フロントに返す「ログイン中ユーザー情報」の作成
     MeResponse me = new MeResponse(user.getId(), user.getName(), user.getEmail(), user.getRole());
-    // フロントに返す「ログイン中ユーザー情報」
 
+    // ログインレスポンスをクライアントに返す
     return new LoginResponse(
         token,                              // access token 本体
         "Bearer",                           // Authorization: Bearer <token> の "Bearer" 部分
@@ -129,13 +138,15 @@ public class AuthService {
    */
   public MeResponse me(Long userId) {
 
-    User user = userMapper.findActiveById(userId);
     // userIdで「有効なユーザー」を取得
+    User user = userMapper.findActiveById(userId);
 
+    // ログイン中ユーザーについて、DB存在をチェック。存在しない場合、401エラーを返す。
     if (user == null) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authenticated user not found.");
     }
 
+    // レスポンス用DTOへの変換
     return new MeResponse(user.getId(), user.getName(), user.getEmail(), user.getRole());
   }
 }

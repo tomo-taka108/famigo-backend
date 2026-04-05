@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
  * Spring Security が「ログイン済みユーザー」として扱うユーザー情報クラス。
  * 通常のフォームログインでは username/password を使うが、Famigo では JWT 認証のため、
  * リクエストに付与されたトークンからuserId / email / role を復元して SecurityContext に格納する。
+ * Controllerなどで @AuthenticationPrincipal AppUserPrincipal principal と書くだけで、ログインユーザー情報にアクセスできるようにする。
  * このクラスは {@link org.springframework.security.core.Authentication#getPrincipal()}として参照される想定。
  */
 @Getter

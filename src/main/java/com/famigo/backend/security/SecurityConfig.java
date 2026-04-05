@@ -17,9 +17,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  * Spring Security の設定クラス。
  * JWT（Bearer）前提で stateless にする。
  */
-@Configuration
-@EnableWebSecurity
-@RequiredArgsConstructor
+@Configuration // 設定クラスであることを示す
+@EnableWebSecurity // Spring Security のウェブセキュリティ機能を有効化
+@RequiredArgsConstructor // final フィールドのコンストラクタを自動生成（Lombok）
 public class SecurityConfig {
 
   private final JwtAuthenticationFilter jwtFilter;
@@ -30,12 +30,12 @@ public class SecurityConfig {
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
     http
-        .csrf(csrf -> csrf.disable())
-        .cors(Customizer.withDefaults())
-        .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .csrf(csrf -> csrf.disable()) // CSRF対策を無効化（APIサーバー＆JWTなので不要なことが多い）
+        .cors(Customizer.withDefaults()) // CORSを有効化（フロントエンドからのクロスドメイン通信を許可）
+        .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // セッションを作らない（ステートレス）
         .exceptionHandling(ex -> ex
-            .authenticationEntryPoint(authenticationEntryPoint)
-            .accessDeniedHandler(accessDeniedHandler)
+            .authenticationEntryPoint(authenticationEntryPoint) // 未ログイン時の401エラー応答
+            .accessDeniedHandler(accessDeniedHandler) // 権限不足時の403エラー応答
         )
 
         // 匿名ユーザー＝GUEST（ログインしてない人にもROLEを与える）
@@ -82,6 +82,7 @@ public class SecurityConfig {
             // その他はログイン必須
             .anyRequest().hasAnyRole("USER", "ADMIN")
         )
+        // ユーザー名パスワード認証フィルターの前に、自作の JWT フィルターを通す（JWTフィルターをどこで動かすかの設定）
         .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
